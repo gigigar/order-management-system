@@ -1,0 +1,3 @@
+# Neon for Postgres, with auth built in the app
+
+We host Postgres on Neon and build login, roles and authorization in the Next.js app, instead of using Supabase's bundled auth, storage and row-level security. Keeping auth in our own code makes it reviewable and testable in the repo rather than in dashboard settings; Neon branches give the public demo and each PR their own database; and Supabase's free tier pauses projects after about a week of inactivity, which would take the owners' tracker offline in slow months. v1 needs no file storage (the gallery uses sample photos), so Supabase's storage wasn't a reason to choose it.
