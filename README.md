@@ -11,7 +11,7 @@ Next.js (App Router) · TypeScript · PostgreSQL (Neon) · Drizzle · Tailwind C
 ## Docs
 
 - [`CONTEXT.md`](CONTEXT.md): the domain glossary (Order, Batch, Stage, Status…)
-- [`docs/discovery.md`](docs/discovery.md): client discovery with the owners
+- [`docs/design.md`](docs/design.md): requirements, architecture and data model
 - [`docs/adr/`](docs/adr/): architecture decisions
 
 ## Run it locally
