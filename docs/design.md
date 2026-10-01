@@ -89,4 +89,5 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 ## Open questions
 
 - Commission on Other items (medals, plaques): not decided by the owners yet.
+- Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Oct 17 (ADR either way).
 - Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Nov 7.
