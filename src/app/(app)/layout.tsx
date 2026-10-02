@@ -2,8 +2,9 @@ import { SignOutButton } from "@/components/auth-buttons";
 import { NavLinks, type NavLink } from "@/components/nav-links";
 import { requireUser } from "@/lib/session";
 
-// Daily pages (Dashboard, Batches, Orders) go above Setup as they're built.
+// Daily pages first (Dashboard and Orders join Batches as they're built).
 // Setup is reference data the owners touch a few times a year.
+const dailyLinks: NavLink[] = [{ href: "/batches", label: "Batches" }];
 const setupLinks: NavLink[] = [
   { href: "/areas", label: "Areas" },
   { href: "/schools", label: "Schools" },
@@ -19,11 +20,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const setup =
     user.role === "admin" ? [...setupLinks, ...adminSetupLinks] : setupLinks;
   const navigation = (
-    <div className="flex flex-col gap-1">
-      <h2 className="px-3 text-xs font-semibold tracking-wide text-gray-600 uppercase">
-        Setup
-      </h2>
-      <NavLinks links={setup} />
+    <div className="flex flex-col gap-4">
+      <NavLinks links={dailyLinks} />
+      <div className="flex flex-col gap-1">
+        <h2 className="px-3 text-xs font-semibold tracking-wide text-gray-600 uppercase">
+          Setup
+        </h2>
+        <NavLinks links={setup} />
+      </div>
     </div>
   );
 
