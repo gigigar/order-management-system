@@ -95,3 +95,10 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 - Google sign-in is in Testing mode (test users only, an "unverified app" warning). Publishing needs a `/privacy` page (also the dog-tag privacy notice) and the final domain. Do it by Oct 17.
 - Neon preview branches copy production, so once real Orders exist, previews hold real customer data. Before Oct 17, branch previews from a seeded fake-data branch instead.
 - Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Nov 7.
+
+## Later (not v1)
+
+Ideas written down so they aren't lost, decided at a milestone boundary. Each needs a problem the owners actually have.
+
+- Map search when adding an Area (Google Places). An Area is a territory the owners name, not an address; revisit only if a feature needs locations (e.g. delivery routes).
+- Changing an existing user's role (today the role is copied from the invite at first sign-in).

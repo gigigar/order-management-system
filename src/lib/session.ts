@@ -1,6 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { auth } from "@/lib/auth";
 
@@ -11,3 +11,10 @@ export const requireUser = cache(async () => {
   if (!session) redirect("/");
   return session.user;
 });
+
+// Admin-only pages and actions. Members get a plain 404, so admin pages stay hidden.
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (user.role !== "admin") notFound();
+  return user;
+}

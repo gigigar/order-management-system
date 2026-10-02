@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { areaSchema, rowId, schoolSchema } from "./validation";
+import {
+  areaSchema,
+  designSchema,
+  inviteSchema,
+  rowId,
+  schoolSchema,
+} from "./validation";
 
 describe("areaSchema", () => {
   it("trims the name", () => {
@@ -42,5 +48,38 @@ describe("rowId", () => {
     for (const bad of [0, -1, 1.5, "7"]) {
       expect(rowId.safeParse(bad).success).toBe(false);
     }
+  });
+});
+
+describe("designSchema", () => {
+  const base = { schoolId: 1, description: "Gold crest, blue stone" };
+
+  it("allows a Design with no year", () => {
+    expect(designSchema.parse({ ...base, year: null }).year).toBeNull();
+  });
+
+  it("rejects years that can't be a class year", () => {
+    for (const year of [27, 3000, 2027.5, NaN]) {
+      expect(designSchema.safeParse({ ...base, year }).success).toBe(false);
+    }
+  });
+});
+
+describe("inviteSchema", () => {
+  it("trims and lowercases the email", () => {
+    expect(
+      inviteSchema.parse({ email: "  Owner@Gmail.COM ", role: "member" }).email,
+    ).toBe("owner@gmail.com");
+  });
+
+  it("rejects something that isn't an email", () => {
+    const result = inviteSchema.safeParse({ email: "owner", role: "member" });
+    expect(result.error?.issues[0].message).toBe("Enter a valid email");
+  });
+
+  it("only allows the two roles", () => {
+    expect(
+      inviteSchema.safeParse({ email: "a@b.co", role: "owner" }).success,
+    ).toBe(false);
   });
 });
