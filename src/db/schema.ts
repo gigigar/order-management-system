@@ -13,6 +13,10 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
+import { user } from "./auth-schema";
+
+export * from "./auth-schema";
+
 // Column names are camelCase here and snake_case in Postgres (casing: "snake_case").
 
 const timestamps = {
@@ -23,16 +27,43 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
+// Who created and last changed a Batch, Order or Payment. Users are never deleted while referenced.
+const audit = {
+  createdBy: text()
+    .notNull()
+    .references(() => user.id, { onDelete: "restrict" }),
+  updatedBy: text()
+    .notNull()
+    .references(() => user.id, { onDelete: "restrict" }),
+};
+
+export const userRole = pgEnum("user_role", ["admin", "member"]);
+
+// Only invited emails can sign in (plus OWNER_EMAILS). Stored lowercase.
+export const invite = pgTable(
+  "invite",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    email: text().notNull().unique(),
+    role: userRole().notNull().default("member"),
+    ...timestamps,
+  },
+  (t) => [check("invite_email_lowercase", sql`${t.email} = lower(${t.email})`)],
+);
+
 export const area = pgTable("area", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull().unique(),
   ...timestamps,
 });
 
-// user_id (the Agent's sign-in account) is added in the auth PR, once the user table exists.
 export const agent = pgTable("agent", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
+  // The Agent's sign-in account, once they have one.
+  userId: text()
+    .unique("agent_user_id_unique")
+    .references(() => user.id, { onDelete: "restrict" }),
   areaId: integer()
     .notNull()
     .references(() => area.id, { onDelete: "restrict" }),
@@ -119,7 +150,7 @@ export const paymentMethod = pgEnum("payment_method", [
   "check",
 ]);
 
-// Money is integer centavos. created_by/updated_by are added in the auth PR, with the user table.
+// Money is integer centavos.
 
 export const batch = pgTable(
   "batch",
@@ -137,6 +168,7 @@ export const batch = pgTable(
     agreementSignedOn: date(),
     cancelledAt: timestamp({ withTimezone: true }),
     ...timestamps,
+    ...audit,
   },
   (t) => [
     // A Batch can be saved half-filled during the deal, but not once it's signed.
@@ -172,6 +204,7 @@ export const order = pgTable(
     productionStage: productionStage(),
     cancelledAt: timestamp({ withTimezone: true }),
     ...timestamps,
+    ...audit,
   },
   (t) => [
     check(
@@ -289,6 +322,7 @@ export const payment = pgTable(
     receiptNo: text(),
     paidOn: date().notNull(),
     ...timestamps,
+    ...audit,
   },
   (t) => [
     check(
