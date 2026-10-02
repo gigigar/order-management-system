@@ -91,7 +91,7 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 ## Open questions
 
 - Commission on Other items (medals, plaques): not decided by the owners yet.
-- Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Oct 17 (ADR either way).
+- Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Oct 17 (ADR either way). At the same time, store the Neon database URLs as Vercel Secrets (rotating the Neon password if needed), before anyone else gets access.
 - Google sign-in is in Testing mode (test users only, an "unverified app" warning). Publishing needs a `/privacy` page (also the dog-tag privacy notice) and the final domain. Do it by Oct 17.
 - Neon preview branches copy production, so once real Orders exist, previews hold real customer data. Before Oct 17, branch previews from a seeded fake-data branch instead.
 - Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Nov 7.
