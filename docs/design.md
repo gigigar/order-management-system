@@ -102,3 +102,4 @@ Ideas written down so they aren't lost, decided at a milestone boundary. Each ne
 
 - Map search when adding an Area (Google Places). An Area is a territory the owners name, not an address; revisit only if a feature needs locations (e.g. delivery routes).
 - Changing an existing user's role (today the role is copied from the invite at first sign-in).
+- Price list: default prices by ring type and material, with per-School overrides; always editable per row, and saved on each item. Until then, the Batch entry table copies the row above. Ask the owners whether prices are stable enough to list.

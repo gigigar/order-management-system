@@ -13,6 +13,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
+import { DEAL_STAGES, PRODUCTION_STAGES } from "../lib/enums";
 import { user } from "./auth-schema";
 
 export * from "./auth-schema";
@@ -94,22 +95,11 @@ export const design = pgTable("design", {
   ...timestamps,
 });
 
-// Stages follow CONTEXT.md. Order matters: Postgres compares enum values by position.
-export const dealStage = pgEnum("deal_stage", [
-  "meeting",
-  "design_presented",
-  "agreement_signed",
-]);
+// Stages follow CONTEXT.md (values in src/lib/enums.ts). Order matters: Postgres
+// compares enum values by position.
+export const dealStage = pgEnum("deal_stage", DEAL_STAGES);
 
-export const productionStage = pgEnum("production_stage", [
-  "order_received",
-  "mold",
-  "casting",
-  "finishing",
-  "finalizing",
-  "ready",
-  "delivered",
-]);
+export const productionStage = pgEnum("production_stage", PRODUCTION_STAGES);
 
 export const itemKind = pgEnum("item_kind", [
   "ring",

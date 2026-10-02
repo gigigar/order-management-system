@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   areaSchema,
+  batchSchema,
   designSchema,
   inviteSchema,
   rowId,
@@ -81,5 +82,73 @@ describe("inviteSchema", () => {
     expect(
       inviteSchema.safeParse({ email: "a@b.co", role: "owner" }).success,
     ).toBe(false);
+  });
+});
+
+describe("batchSchema", () => {
+  const early = {
+    schoolId: 1,
+    designId: null,
+    repName: null,
+    repPhone: null,
+    dueDate: null,
+    dealStage: "meeting",
+    productionStage: "order_received",
+    agreementSignedOn: null,
+    agentId: null,
+    secondAgentId: null,
+    secondAgentShare: null,
+  } as const;
+
+  const messages = (input: unknown) =>
+    batchSchema
+      .safeParse(input)
+      .error?.issues.map((i) => [i.path[0], i.message]);
+
+  it("allows a half-filled Batch during the deal", () => {
+    expect(batchSchema.safeParse(early).success).toBe(true);
+  });
+
+  it("names each missing field once the agreement is signed", () => {
+    expect(messages({ ...early, dealStage: "agreement_signed" })).toEqual([
+      ["designId", "Choose the Design before signing"],
+      ["repName", "Enter the Rep before signing"],
+      ["dueDate", "Set the Due date before signing"],
+    ]);
+  });
+
+  it("allows one Agent, or two with a split", () => {
+    expect(batchSchema.safeParse({ ...early, agentId: 1 }).success).toBe(true);
+    expect(
+      batchSchema.safeParse({
+        ...early,
+        agentId: 1,
+        secondAgentId: 2,
+        secondAgentShare: 40,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a second Agent that is missing a share, repeats the first, or has no first", () => {
+    expect(messages({ ...early, agentId: 1, secondAgentId: 2 })).toEqual([
+      ["secondAgentShare", "Enter a % from 1 to 99"],
+    ]);
+    expect(
+      messages({
+        ...early,
+        agentId: 1,
+        secondAgentId: 1,
+        secondAgentShare: 50,
+      }),
+    ).toEqual([["secondAgentId", "Choose a different Agent"]]);
+    expect(
+      messages({ ...early, secondAgentId: 2, secondAgentShare: 50 }),
+    ).toEqual([["agentId", "Choose the first Agent"]]);
+  });
+
+  it("rejects an impossible date", () => {
+    expect(messages({ ...early, dueDate: "2026-02-30" })).toEqual([
+      ["dueDate", "Enter a valid date"],
+    ]);
   });
 });
