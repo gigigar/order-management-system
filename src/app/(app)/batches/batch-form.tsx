@@ -9,6 +9,7 @@ import {
   SubmitButton,
   TextField,
 } from "@/components/form-fields";
+import { useWarnOnLeave } from "@/components/unsaved-changes";
 import { applyErrors } from "@/lib/apply-errors";
 import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
 import {
@@ -56,6 +57,7 @@ export function BatchForm({
     resolver: zodResolver(batchSchema),
     defaultValues: defaultValues ?? (emptyBatch as BatchInput),
   });
+  useWarnOnLeave(isDirty);
 
   // Only the chosen School's Designs; a second Agent only after a first.
   const schoolId = useWatch({ control, name: "schoolId" });

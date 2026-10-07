@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  type Control,
-  type FieldErrors,
-  type UseFormRegister,
-  useWatch,
-} from "react-hook-form";
+import { get, useFormContext, useWatch } from "react-hook-form";
 import { SelectField, TextField } from "@/components/form-fields";
 import {
   BLOOD_TYPES,
@@ -22,58 +17,64 @@ import {
   type ItemKind,
 } from "@/lib/enums";
 import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
-import type { IndividualOrderInput, ItemInput } from "@/lib/validation";
+import type { ItemInput } from "@/lib/validation";
 
 // A new row of the chosen kind, keeping what every kind shares. Its own fields start
 // empty, and the schema asks for them on save.
-export function blankItem(
-  kind: ItemKind,
+export function blankItem<K extends ItemKind>(
+  kind: K,
   keep: Pick<ItemInput, "id" | "quantity" | "unitPrice"> = {
     id: null,
     quantity: 1,
     unitPrice: null as unknown as number,
   },
-): ItemInput {
-  return { ...keep, kind } as ItemInput;
+): Extract<ItemInput, { kind: K }> {
+  return { ...keep, kind } as Extract<ItemInput, { kind: K }>;
 }
 
-// Each item kind has different fields, and React Hook Form types errors on a union
-// as only the shared ones, so they're read by field name here.
-type RowErrors = Partial<Record<string, { message?: string }>>;
-
+// One item's fields, used wherever items are entered: an Individual order, extra
+// items on a student's row, and Batch items. `name` is the item's path in the form
+// (e.g. "items.0" or "orders.3.items.1"), read through the surrounding FormProvider.
+// Paths are built at runtime, so they're plain strings here; the form's Zod schema
+// still checks every value.
 export function ItemFields({
-  index,
+  name,
+  legend,
+  kinds = ITEM_KINDS,
   stones,
-  control,
-  register,
-  errors,
   onKindChange,
   onRemove,
 }: {
-  index: number;
+  name: string;
+  legend: string;
+  // Which kinds the Kind dropdown offers (Batch items: pin and other only).
+  kinds?: readonly ItemKind[];
   stones: { id: number; name: string }[];
-  control: Control<IndividualOrderInput>;
-  register: UseFormRegister<IndividualOrderInput>;
-  errors: FieldErrors<IndividualOrderInput>;
   onKindChange: (kind: ItemKind) => void;
   onRemove?: () => void;
 }) {
-  const kind = useWatch({ control, name: `items.${index}.kind` });
-  const material = useWatch({ control, name: `items.${index}.material` });
-  const face = useWatch({ control, name: `items.${index}.face` });
-  const e = (errors.items?.[index] ?? {}) as RowErrors;
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext();
+  const kind = useWatch({ control, name: `${name}.kind` });
+  const material = useWatch({ control, name: `${name}.material` });
+  const face = useWatch({ control, name: `${name}.face` });
+  const error = (field: string): string | undefined =>
+    get(errors, `${name}.${field}`)?.message;
 
   return (
     <fieldset className="flex flex-col gap-3 rounded border p-3">
-      <legend className="px-1 font-medium">Item {index + 1}</legend>
+      <legend className="px-1 font-medium">{legend}</legend>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <SelectField
           label="Kind"
-          {...register(`items.${index}.kind`, {
+          {...register(`${name}.kind`, {
             onChange: (event) => onKindChange(event.target.value as ItemKind),
           })}
         >
-          {ITEM_KINDS.map((k) => (
+          {kinds.map((k) => (
             <option key={k} value={k}>
               {itemKindLabels[k]}
             </option>
@@ -82,16 +83,16 @@ export function ItemFields({
         <TextField
           label="Quantity"
           inputMode="numeric"
-          error={e.quantity?.message}
-          {...register(`items.${index}.quantity`, {
+          error={error("quantity")}
+          {...register(`${name}.quantity`, {
             setValueAs: emptyToNullNumber,
           })}
         />
         <TextField
           label="Price each (₱)"
           inputMode="decimal"
-          error={e.unitPrice?.message}
-          {...register(`items.${index}.unitPrice`, {
+          error={error("unitPrice")}
+          {...register(`${name}.unitPrice`, {
             setValueAs: emptyToNullNumber,
           })}
         />
@@ -102,8 +103,8 @@ export function ItemFields({
           <SelectField
             label="Ring type"
             defaultValue=""
-            error={e.ringType?.message}
-            {...register(`items.${index}.ringType`, {
+            error={error("ringType")}
+            {...register(`${name}.ringType`, {
               setValueAs: emptyToNull,
             })}
           >
@@ -119,8 +120,8 @@ export function ItemFields({
           <SelectField
             label="Material"
             defaultValue=""
-            error={e.material?.message}
-            {...register(`items.${index}.material`, {
+            error={error("material")}
+            {...register(`${name}.material`, {
               setValueAs: emptyToNull,
             })}
           >
@@ -137,8 +138,8 @@ export function ItemFields({
             <SelectField
               label="Karat"
               defaultValue=""
-              error={e.karat?.message}
-              {...register(`items.${index}.karat`, {
+              error={error("karat")}
+              {...register(`${name}.karat`, {
                 setValueAs: emptyToNullNumber,
               })}
             >
@@ -155,16 +156,16 @@ export function ItemFields({
           <TextField
             label="Size"
             inputMode="decimal"
-            error={e.size?.message}
-            {...register(`items.${index}.size`, {
+            error={error("size")}
+            {...register(`${name}.size`, {
               setValueAs: emptyToNullNumber,
             })}
           />
           <SelectField
             label="Face"
             defaultValue=""
-            error={e.face?.message}
-            {...register(`items.${index}.face`, { setValueAs: emptyToNull })}
+            error={error("face")}
+            {...register(`${name}.face`, { setValueAs: emptyToNull })}
           >
             <option value="" disabled>
               Choose
@@ -188,8 +189,8 @@ export function ItemFields({
               <SelectField
                 label="Stone"
                 defaultValue=""
-                error={e.stoneId?.message}
-                {...register(`items.${index}.stoneId`, {
+                error={error("stoneId")}
+                {...register(`${name}.stoneId`, {
                   setValueAs: emptyToNullNumber,
                 })}
               >
@@ -205,8 +206,8 @@ export function ItemFields({
             ))}
           <TextField
             label="Engraving (optional)"
-            error={e.engraving?.message}
-            {...register(`items.${index}.engraving`, {
+            error={error("engraving")}
+            {...register(`${name}.engraving`, {
               setValueAs: emptyToNull,
             })}
           />
@@ -219,16 +220,16 @@ export function ItemFields({
             <TextField
               label="Birthday"
               type="date"
-              error={e.birthday?.message}
-              {...register(`items.${index}.birthday`, {
+              error={error("birthday")}
+              {...register(`${name}.birthday`, {
                 setValueAs: emptyToNull,
               })}
             />
             <SelectField
               label="Blood type"
               defaultValue=""
-              error={e.bloodType?.message}
-              {...register(`items.${index}.bloodType`, {
+              error={error("bloodType")}
+              {...register(`${name}.bloodType`, {
                 setValueAs: emptyToNull,
               })}
             >
@@ -253,8 +254,8 @@ export function ItemFields({
       {kind === "other" && (
         <TextField
           label="Description (e.g. medal, plaque)"
-          error={e.description?.message}
-          {...register(`items.${index}.description`, {
+          error={error("description")}
+          {...register(`${name}.description`, {
             setValueAs: emptyToNull,
           })}
         />
@@ -266,7 +267,7 @@ export function ItemFields({
           onClick={onRemove}
           className="self-start text-sm text-red-700 underline"
         >
-          Remove item {index + 1}
+          Remove {legend.toLowerCase()}
         </button>
       )}
     </fieldset>

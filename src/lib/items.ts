@@ -1,5 +1,6 @@
 import type { item } from "../db/schema";
-import { toCentavos } from "./money";
+import type { KARATS } from "./enums";
+import { toCentavos, toPesos } from "./money";
 import type { ItemInput } from "./validation";
 
 // One item table with nullable columns (design doc trade-off): each kind fills its
@@ -51,5 +52,43 @@ export function itemColumns(input: ItemInput): ItemColumns {
       return columns;
     case "other":
       return { ...columns, description: input.description };
+  }
+}
+
+type Karat = (typeof KARATS)[number];
+
+// Database row → form row: centavos back to pesos, and only the kind's own fields.
+// The item_*_is_complete CHECKs guarantee each kind's fields are filled, hence the !s.
+export function itemInputFromRow(row: typeof item.$inferSelect): ItemInput {
+  const base = {
+    id: row.id,
+    quantity: row.quantity,
+    unitPrice: toPesos(row.unitPrice),
+  };
+  switch (row.kind) {
+    case "ring":
+      return {
+        ...base,
+        kind: "ring",
+        ringType: row.ringType!,
+        material: row.material!,
+        // The item_karat_only_for_gold CHECK keeps it to 10, 14 or 18.
+        karat: row.karat as Karat | null,
+        size: row.size!,
+        face: row.face!,
+        stoneId: row.stoneId,
+        engraving: row.engraving,
+      };
+    case "dog_tag":
+      return {
+        ...base,
+        kind: "dog_tag",
+        birthday: row.birthday!,
+        bloodType: row.bloodType!,
+      };
+    case "pin":
+      return { ...base, kind: "pin" };
+    case "other":
+      return { ...base, kind: "other", description: row.description! };
   }
 }

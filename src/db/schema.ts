@@ -236,6 +236,11 @@ export const item = pgTable(
   },
   (t) => [
     check("item_one_parent", sql`num_nonnulls(${t.orderId}, ${t.batchId}) = 1`),
+    // Batch items are for the whole Batch: rings and dog tags are always one student's.
+    check(
+      "item_batch_item_kind",
+      sql`${t.batchId} IS NULL OR ${t.kind} IN ('pin', 'other')`,
+    ),
     check("item_quantity_positive", sql`${t.quantity} > 0`),
     check("item_price_not_negative", sql`${t.unitPrice} >= 0`),
     // Engraving is optional: not every ring is engraved.

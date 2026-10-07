@@ -1,10 +1,24 @@
-import { eq } from "drizzle-orm";
+import { asc, eq, inArray, or } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { agentCredit, batch, school } from "@/db/schema";
+import { agentCredit, batch, item, order, school } from "@/db/schema";
+import { itemInputFromRow } from "@/lib/items";
+import type { BatchItemInput, SchoolOrderInput } from "@/lib/validation";
 import { requireUser } from "@/lib/session";
+import { BatchEntry } from "../batch-entry";
 import { BatchForm } from "../batch-form";
 import { batchFormOptions } from "../options";
+
+// The entry table shows a student's ring in its columns, so it goes first.
+function ringFirst(
+  rows: (typeof item.$inferSelect)[],
+): SchoolOrderInput["items"] {
+  const ring = rows.find((r) => r.kind === "ring");
+  const rest = rows.filter((r) => r !== ring);
+  return [ring, ...rest]
+    .filter((r) => r !== undefined)
+    .map(itemInputFromRow) as SchoolOrderInput["items"];
+}
 
 export default async function BatchPage({
   params,
@@ -13,7 +27,7 @@ export default async function BatchPage({
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const [[found], credits, options] = await Promise.all([
+  const [[found], credits, options, orders, items] = await Promise.all([
     db
       .select({ batch, schoolName: school.name })
       .from(batch)
@@ -25,7 +39,30 @@ export default async function BatchPage({
       .where(eq(agentCredit.batchId, id))
       .orderBy(agentCredit.id),
     batchFormOptions(),
+    db.select().from(order).where(eq(order.batchId, id)).orderBy(asc(order.id)),
+    // The Batch's own items and its School orders' items, in one query.
+    db
+      .select()
+      .from(item)
+      .where(
+        or(
+          eq(item.batchId, id),
+          inArray(
+            item.orderId,
+            db
+              .select({ id: order.id })
+              .from(order)
+              .where(eq(order.batchId, id)),
+          ),
+        ),
+      )
+      .orderBy(asc(item.id)),
   ]);
+  const batchItems = items.filter((i) => i.batchId === id);
+  const itemsByOrder = Map.groupBy(
+    items.filter((i) => i.orderId !== null),
+    (i) => i.orderId!,
+  );
   if (!found) notFound();
   const b = found.batch;
   const [first, second] = credits;
@@ -50,12 +87,22 @@ export default async function BatchPage({
           secondAgentShare: second?.sharePercent ?? null,
         }}
       />
-      <section className="flex flex-col gap-2 border-t pt-4">
-        <h2 className="font-semibold">Orders</h2>
-        <p className="text-sm text-gray-600">
-          The Batch entry table comes in the next update.
-        </p>
-      </section>
+      <div className="border-t pt-4">
+        <BatchEntry
+          batchId={b.id}
+          stones={options.stones}
+          defaultValues={{
+            orders: orders.map((o) => ({
+              id: o.id,
+              customerName: o.customerName,
+              customerPhone: o.customerPhone,
+              items: ringFirst(itemsByOrder.get(o.id) ?? []),
+            })),
+            // The item_batch_item_kind CHECK keeps these to pins and other items.
+            batchItems: batchItems.map(itemInputFromRow) as BatchItemInput[],
+          }}
+        />
+      </div>
     </div>
   );
 }

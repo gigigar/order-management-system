@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { itemColumns } from "./items";
-import { itemSchema } from "./validation";
+import { itemColumns, itemInputFromRow } from "./items";
+import { batchItemSchema, itemSchema, schoolOrderSchema } from "./validation";
 
 const ring = {
   id: null,
@@ -100,5 +100,71 @@ describe("itemColumns", () => {
       birthday: null,
       description: null,
     });
+  });
+});
+
+describe("itemInputFromRow", () => {
+  it("round-trips a saved ring back into the form", () => {
+    const parsed = itemSchema.parse(ring);
+    const row = {
+      ...itemColumns(parsed),
+      id: 5,
+      orderId: 1,
+      batchId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    expect(itemInputFromRow(row)).toEqual({ ...parsed, id: 5 });
+  });
+});
+
+describe("schoolOrderSchema", () => {
+  const student = { id: null, customerName: "Ana Cruz", customerPhone: null };
+
+  it("accepts a student with a ring and an extra dog tag, no phone", () => {
+    const dogTag = {
+      id: null,
+      kind: "dog_tag",
+      quantity: 1,
+      unitPrice: 0,
+      birthday: "2005-03-04",
+      bloodType: "O+",
+    };
+    expect(
+      schoolOrderSchema.safeParse({ ...student, items: [ring, dogTag] })
+        .success,
+    ).toBe(true);
+  });
+
+  it("needs the row's first item to be a ring", () => {
+    const pin = { id: null, kind: "pin", quantity: 1, unitPrice: 150 };
+    expect(
+      schoolOrderSchema.safeParse({ ...student, items: [pin] }).success,
+    ).toBe(false);
+  });
+
+  it("names the cell with the problem", () => {
+    const result = schoolOrderSchema.safeParse({
+      ...student,
+      items: [{ ...ring, size: 7.25 }],
+    });
+    expect(result.error?.issues[0].path).toEqual(["items", 0, "size"]);
+  });
+});
+
+describe("batchItemSchema", () => {
+  it("allows pins and other items", () => {
+    expect(
+      batchItemSchema.safeParse({
+        id: null,
+        kind: "pin",
+        quantity: 30,
+        unitPrice: 150,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses rings and dog tags, which are always one student's", () => {
+    expect(batchItemSchema.safeParse(ring).success).toBe(false);
   });
 });
