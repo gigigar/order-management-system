@@ -1,0 +1,2 @@
+ALTER TABLE "item" DROP CONSTRAINT "item_ring_is_complete";--> statement-breakpoint
+ALTER TABLE "item" ADD CONSTRAINT "item_ring_is_complete" CHECK ("item"."kind" <> 'ring' OR ("item"."ring_type" IS NOT NULL AND "item"."material" IS NOT NULL AND "item"."size" IS NOT NULL AND "item"."stone" IS NOT NULL));

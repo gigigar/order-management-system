@@ -57,15 +57,30 @@ export function SelectField({
   const id = useId();
   return (
     <Field id={id} label={label} error={error}>
-      <select
-        id={id}
-        className={inputClass}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        {...props}
-      >
-        {children}
-      </select>
+      {/* The browser's own arrow sits at the very edge; this one lines up with the padding. */}
+      <div className="relative">
+        <select
+          id={id}
+          className={`${inputClass} w-full appearance-none bg-white pr-9`}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          {...props}
+        >
+          {children}
+        </select>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-gray-600"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </div>
     </Field>
   );
 }

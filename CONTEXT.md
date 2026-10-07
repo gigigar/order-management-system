@@ -68,6 +68,14 @@ _Avoid_: Template, mold
 The ring's style: megabull, superbull, bullring, semibull, men's standard, unisex or ladies.
 _Avoid_: Model, style
 
+**Face**:
+What's set on top of a ring: a Stone, or the School's logo.
+_Avoid_: Top, setting
+
+**Stone**:
+A gem a Customer can choose for a ring's Face, from a list the Main office keeps up to date.
+_Avoid_: Gem, birthstone
+
 **Other item**:
 Anything outside rings, pins and dog tags, such as medals or plaques.
 _Avoid_: Misc, extra

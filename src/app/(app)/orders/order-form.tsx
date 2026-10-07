@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import {
   FormError,
   SelectField,
@@ -10,63 +10,75 @@ import {
   TextField,
 } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
+import { PRODUCTION_STAGES, productionStageLabels } from "@/lib/enums";
 import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
+import { formatPesos, toCentavos } from "@/lib/money";
 import {
-  DEAL_STAGES,
-  PRODUCTION_STAGES,
-  dealStageLabels,
-  productionStageLabels,
-} from "@/lib/enums";
-import { batchSchema, type BatchInput } from "@/lib/validation";
-import { saveBatch } from "./actions";
-import type { BatchFormOptions } from "./options";
+  individualOrderSchema,
+  type IndividualOrderInput,
+} from "@/lib/validation";
+import type { BatchFormOptions } from "../batches/options";
+import { saveIndividualOrder } from "./actions";
+import { ItemFields, blankItem } from "./item-fields";
 
-export const emptyBatch: Omit<BatchInput, "schoolId"> = {
-  designId: null,
-  repName: null,
-  repPhone: null,
-  dueDate: null,
-  dealStage: "meeting",
+export const emptyOrder: Omit<IndividualOrderInput, "schoolId"> = {
+  customerName: "",
+  customerPhone: "",
+  address: null,
+  dueDate: "",
   productionStage: "order_received",
-  agreementSignedOn: null,
   agentId: null,
   secondAgentId: null,
   secondAgentShare: null,
+  items: [blankItem("ring")],
 };
 
-export function BatchForm({
+type Options = Pick<BatchFormOptions, "schools" | "agents" | "stones">;
+
+export function OrderForm({
   id = null,
   defaultValues,
   options,
 }: {
   id?: number | null;
-  defaultValues?: BatchInput;
-  options: BatchFormOptions;
+  defaultValues?: IndividualOrderInput;
+  options: Options;
 }) {
   const router = useRouter();
   const {
     register,
     handleSubmit,
     setError,
-    setValue,
+    getValues,
     reset,
     control,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<BatchInput>({
-    resolver: zodResolver(batchSchema),
-    defaultValues: defaultValues ?? (emptyBatch as BatchInput),
+  } = useForm<IndividualOrderInput>({
+    resolver: zodResolver(individualOrderSchema),
+    defaultValues: defaultValues ?? (emptyOrder as IndividualOrderInput),
+  });
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "items",
   });
 
-  // Only the chosen School's Designs; a second Agent only after a first.
-  const schoolId = useWatch({ control, name: "schoolId" });
-  const designs = options.designs.filter((d) => d.schoolId === schoolId);
   const hasSecondAgent = useWatch({ control, name: "secondAgentId" }) !== null;
+  const items = useWatch({ control, name: "items" });
+  // Live total while typing; rows with a blank or invalid price count as 0.
+  const total = items.reduce((sum, i) => {
+    const line = (i.quantity ?? 0) * (i.unitPrice ?? 0);
+    return sum + (Number.isFinite(line) ? toCentavos(line) : 0);
+  }, 0);
 
   const onSubmit = handleSubmit(async (values) => {
-    const result = await saveBatch(id, values);
+    const result = await saveIndividualOrder(id, values);
     if (!result.ok) return applyErrors(result, setError);
-    if (id === null) return router.push(`/batches/${result.id}`);
-    reset(values); // the saved values become the new "unchanged" state
+    if (id === null) return router.push(`/orders/${result.id}`);
+    // New items now have ids, so the next save updates them instead of re-adding them.
+    reset({
+      ...values,
+      items: values.items.map((i, k) => ({ ...i, id: result.itemIds[k] })),
+    });
     router.refresh();
   });
 
@@ -77,15 +89,23 @@ export function BatchForm({
       className="flex max-w-3xl flex-col gap-6"
     >
       <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">School</legend>
+        <legend className="mb-2 font-semibold">Customer</legend>
+        <TextField
+          label="Name"
+          error={errors.customerName?.message}
+          {...register("customerName")}
+        />
+        <TextField
+          label="Phone"
+          type="tel"
+          error={errors.customerPhone?.message}
+          {...register("customerPhone")}
+        />
         <SelectField
           label="School"
           error={errors.schoolId?.message}
           defaultValue=""
-          {...register("schoolId", {
-            valueAsNumber: true,
-            onChange: () => setValue("designId", null),
-          })}
+          {...register("schoolId", { valueAsNumber: true })}
         >
           <option value="" disabled>
             Choose a School
@@ -96,60 +116,52 @@ export function BatchForm({
             </option>
           ))}
         </SelectField>
-        <SelectField
-          label="Design"
-          error={errors.designId?.message}
-          {...register("designId", { setValueAs: emptyToNullNumber })}
-        >
-          <option value="">Not chosen yet</option>
-          {designs.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.year ? `${d.year} · ` : ""}
-              {d.description}
-            </option>
-          ))}
-        </SelectField>
+        <TextField
+          label="Delivery address (optional)"
+          error={errors.address?.message}
+          {...register("address", { setValueAs: emptyToNull })}
+        />
       </fieldset>
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Rep</legend>
-        <TextField
-          label="Rep name"
-          error={errors.repName?.message}
-          {...register("repName", { setValueAs: emptyToNull })}
+        <legend className="mb-2 font-semibold">Items</legend>
+        {fields.map((f, index) => (
+          <ItemFields
+            key={f.id}
+            index={index}
+            stones={options.stones}
+            control={control}
+            register={register}
+            errors={errors}
+            onKindChange={(kind) => {
+              const { id, quantity, unitPrice } = getValues(`items.${index}`);
+              update(index, blankItem(kind, { id, quantity, unitPrice }));
+            }}
+            onRemove={fields.length > 1 ? () => remove(index) : undefined}
+          />
+        ))}
+        <FormError
+          message={errors.items?.message ?? errors.items?.root?.message}
         />
-        <TextField
-          label="Rep phone"
-          type="tel"
-          error={errors.repPhone?.message}
-          {...register("repPhone", { setValueAs: emptyToNull })}
-        />
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => append(blankItem("ring"))}
+            className="rounded border border-gray-400 px-3 py-1.5 text-sm"
+          >
+            Add item
+          </button>
+          <p className="font-medium">Total: {formatPesos(total)}</p>
+        </div>
       </fieldset>
 
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 font-semibold">Progress</legend>
-        <SelectField
-          label="Deal stage"
-          error={errors.dealStage?.message}
-          {...register("dealStage")}
-        >
-          {DEAL_STAGES.map((s) => (
-            <option key={s} value={s}>
-              {dealStageLabels[s]}
-            </option>
-          ))}
-        </SelectField>
-        <TextField
-          label="Agreement signed on"
-          type="date"
-          error={errors.agreementSignedOn?.message}
-          {...register("agreementSignedOn", { setValueAs: emptyToNull })}
-        />
         <TextField
           label="Due date"
           type="date"
           error={errors.dueDate?.message}
-          {...register("dueDate", { setValueAs: emptyToNull })}
+          {...register("dueDate")}
         />
         <SelectField
           label="Production stage"
@@ -202,7 +214,7 @@ export function BatchForm({
 
       <FormError message={errors.root?.message} />
       <SubmitButton pending={isSubmitting}>
-        {id === null ? "Create Batch" : isDirty ? "Save changes" : "Saved"}
+        {id === null ? "Create Order" : isDirty ? "Save changes" : "Saved"}
       </SubmitButton>
     </form>
   );

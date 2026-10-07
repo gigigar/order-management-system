@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { FormError, SubmitButton, TextField } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
-import { areaSchema, type AreaInput } from "@/lib/validation";
-import { saveArea } from "./actions";
+import { stoneSchema, type StoneInput } from "@/lib/validation";
+import { saveStone } from "./actions";
 
-export function AreaForm({
+export function StoneForm({
   id = null,
   defaultValues = { name: "" },
 }: {
   id?: number | null;
-  defaultValues?: AreaInput;
+  defaultValues?: StoneInput;
 }) {
   const router = useRouter();
   const {
@@ -22,16 +22,16 @@ export function AreaForm({
     setError,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<AreaInput>({
-    resolver: zodResolver(areaSchema), // checks in the browser before sending
+  } = useForm<StoneInput>({
+    resolver: zodResolver(stoneSchema), // checks in the browser before sending
     defaultValues,
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    const result = await saveArea(id, values);
+    const result = await saveStone(id, values);
     if (!result.ok) return applyErrors(result, setError);
     if (id === null) reset();
-    else router.push("/areas");
+    else router.push("/stones");
   });
 
   return (
@@ -47,7 +47,7 @@ export function AreaForm({
       />
       <FormError message={errors.root?.message} />
       <SubmitButton pending={isSubmitting}>
-        {id === null ? "Add Area" : "Save"}
+        {id === null ? "Add Stone" : "Save"}
       </SubmitButton>
     </form>
   );

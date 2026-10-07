@@ -22,6 +22,34 @@
       "when": 1790933148301,
       "tag": "0002_motionless_hiroim",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791371145229,
+      "tag": "0003_famous_shadowcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791371397818,
+      "tag": "0004_lying_elektra",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791371578444,
+      "tag": "0005_uneven_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791371593493,
+      "tag": "0006_organic_doomsday",
+      "breakpoints": true
     }
   ]
 }

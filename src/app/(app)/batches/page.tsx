@@ -1,12 +1,11 @@
 import { eq, sql } from "drizzle-orm";
 import Link from "next/link";
+import { DueBadge } from "@/components/due-badge";
 import { db } from "@/db";
 import { batch, order, school } from "@/db/schema";
 import { dueStatus, todayInManila } from "@/lib/dates";
 import { dealStageLabels, productionStageLabels } from "@/lib/enums";
 import { requireUser } from "@/lib/session";
-
-const dueLabels = { overdue: "Overdue", due_soon: "Due soon" } as const;
 
 export default async function BatchesPage() {
   await requireUser();
@@ -55,12 +54,16 @@ export default async function BatchesPage() {
             </thead>
             <tbody className="divide-y">
               {rows.map((row) => {
+                const delivered = row.productionStage === "delivered";
                 const status = dueStatus(row.dueDate, today, {
-                  delivered: row.productionStage === "delivered",
+                  delivered,
                   cancelled: row.cancelledAt !== null,
                 });
                 return (
-                  <tr key={row.id}>
+                  <tr
+                    key={row.id}
+                    className={delivered ? "text-gray-500" : undefined}
+                  >
                     <td className="p-3">
                       <Link href={`/batches/${row.id}`} className="underline">
                         {row.schoolName}
@@ -71,17 +74,7 @@ export default async function BatchesPage() {
                     </td>
                     <td className="p-3 whitespace-nowrap">
                       {row.dueDate ?? "—"}
-                      {status && (
-                        <span
-                          className={`ml-2 rounded px-1.5 py-0.5 text-xs ${
-                            status === "overdue"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-amber-100 text-amber-900"
-                          }`}
-                        >
-                          {dueLabels[status]}
-                        </span>
-                      )}
+                      <DueBadge status={status} delivered={delivered} />
                     </td>
                     <td className="p-3">
                       {productionStageLabels[row.productionStage]}

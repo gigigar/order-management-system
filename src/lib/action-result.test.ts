@@ -14,6 +14,12 @@ describe("fieldErrorsOf", () => {
       areaId: "Choose an Area",
     });
   });
+
+  it("joins nested paths the way React Hook Form names fields", () => {
+    const schema = z.object({ items: z.array(z.object({ size: z.number() })) });
+    const result = schema.safeParse({ items: [{ size: 7 }, { size: "x" }] });
+    expect(Object.keys(fieldErrorsOf(result.error!))).toEqual(["items.1.size"]);
+  });
 });
 
 describe("isUniqueViolation", () => {
@@ -24,6 +30,12 @@ describe("isUniqueViolation", () => {
   it("finds code 23505 on a wrapped error's cause", () => {
     const wrapped = new Error("Failed query", { cause: { code: "23505" } });
     expect(isUniqueViolation(wrapped)).toBe(true);
+  });
+
+  it("can match one constraint only", () => {
+    const error = { code: "23505", constraint: "order_code_unique" };
+    expect(isUniqueViolation(error, "order_code_unique")).toBe(true);
+    expect(isUniqueViolation(error, "school_area_id_name_unique")).toBe(false);
   });
 
   it("ignores other database errors", () => {
