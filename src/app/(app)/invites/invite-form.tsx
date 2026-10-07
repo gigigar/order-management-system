@@ -31,7 +31,11 @@ export function InviteForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="flex max-w-md flex-col gap-3"
+    >
       <TextField
         label="Google account email"
         type="email"

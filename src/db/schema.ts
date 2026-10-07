@@ -13,7 +13,15 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-import { DEAL_STAGES, PRODUCTION_STAGES } from "../lib/enums";
+import {
+  BLOOD_TYPES,
+  DEAL_STAGES,
+  FACES,
+  ITEM_KINDS,
+  MATERIALS,
+  PRODUCTION_STAGES,
+  RING_TYPES,
+} from "../lib/enums";
 import { user } from "./auth-schema";
 
 export * from "./auth-schema";
@@ -85,6 +93,13 @@ export const school = pgTable(
   (t) => [unique("school_area_id_name_unique").on(t.areaId, t.name)],
 );
 
+// Stones offered for rings, managed in Setup (the list changes with the supplier).
+export const stone = pgTable("stone", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: text().notNull().unique(),
+  ...timestamps,
+});
+
 export const design = pgTable("design", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   schoolId: integer()
@@ -101,35 +116,15 @@ export const dealStage = pgEnum("deal_stage", DEAL_STAGES);
 
 export const productionStage = pgEnum("production_stage", PRODUCTION_STAGES);
 
-export const itemKind = pgEnum("item_kind", [
-  "ring",
-  "dog_tag",
-  "pin",
-  "other",
-]);
+export const itemKind = pgEnum("item_kind", ITEM_KINDS);
 
-export const ringType = pgEnum("ring_type", [
-  "megabull",
-  "superbull",
-  "bullring",
-  "semibull",
-  "mens_standard",
-  "unisex",
-  "ladies",
-]);
+export const ringType = pgEnum("ring_type", RING_TYPES);
 
-export const material = pgEnum("material", ["gold", "silver", "velum"]);
+export const material = pgEnum("material", MATERIALS);
 
-export const bloodType = pgEnum("blood_type", [
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
-]);
+export const face = pgEnum("face", FACES);
+
+export const bloodType = pgEnum("blood_type", BLOOD_TYPES);
 
 export const paymentKind = pgEnum("payment_kind", ["deposit", "balance"]);
 
@@ -224,14 +219,13 @@ export const item = pgTable(
     quantity: integer().notNull().default(1),
     // Copied when saved, so later price changes don't rewrite old Orders.
     unitPrice: integer().notNull(),
-    // Main office's price, for markup Commission on dog tags.
-    basePrice: integer(),
     // Ring
     ringType: ringType(),
     material: material(),
     karat: smallint(),
     size: numeric({ precision: 3, scale: 1, mode: "number" }),
-    stone: text(),
+    face: face(),
+    stoneId: integer().references(() => stone.id, { onDelete: "restrict" }),
     engraving: text(),
     // Dog tag
     birthday: date(),
@@ -243,18 +237,21 @@ export const item = pgTable(
   (t) => [
     check("item_one_parent", sql`num_nonnulls(${t.orderId}, ${t.batchId}) = 1`),
     check("item_quantity_positive", sql`${t.quantity} > 0`),
-    check(
-      "item_prices_not_negative",
-      sql`${t.unitPrice} >= 0 AND (${t.basePrice} IS NULL OR ${t.basePrice} >= 0)`,
-    ),
+    check("item_price_not_negative", sql`${t.unitPrice} >= 0`),
+    // Engraving is optional: not every ring is engraved.
     check(
       "item_ring_is_complete",
-      sql`${t.kind} <> 'ring' OR (${t.ringType} IS NOT NULL AND ${t.material} IS NOT NULL AND ${t.size} IS NOT NULL AND ${t.stone} IS NOT NULL AND ${t.engraving} IS NOT NULL)`,
+      sql`${t.kind} <> 'ring' OR (${t.ringType} IS NOT NULL AND ${t.material} IS NOT NULL AND ${t.size} IS NOT NULL AND ${t.face} IS NOT NULL)`,
     ),
     // Karat only for gold, and always for gold.
     check(
       "item_karat_only_for_gold",
       sql`(${t.material} = 'gold' AND ${t.karat} IN (10, 14, 18)) OR (${t.material} IS DISTINCT FROM 'gold' AND ${t.karat} IS NULL)`,
+    ),
+    // A stone exactly when the Face is a stone; a logo has none.
+    check(
+      "item_stone_matches_face",
+      sql`(${t.face} IS NOT DISTINCT FROM 'stone') = (${t.stoneId} IS NOT NULL)`,
     ),
     check(
       "item_size_whole_or_half",
@@ -262,7 +259,7 @@ export const item = pgTable(
     ),
     check(
       "item_dog_tag_is_complete",
-      sql`${t.kind} <> 'dog_tag' OR (${t.birthday} IS NOT NULL AND ${t.bloodType} IS NOT NULL AND ${t.basePrice} IS NOT NULL)`,
+      sql`${t.kind} <> 'dog_tag' OR (${t.birthday} IS NOT NULL AND ${t.bloodType} IS NOT NULL)`,
     ),
     check(
       "item_other_has_description",

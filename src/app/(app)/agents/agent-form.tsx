@@ -42,7 +42,11 @@ export function AgentForm({
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="flex max-w-md flex-col gap-3"
+    >
       <TextField
         label="Name"
         error={errors.name?.message}

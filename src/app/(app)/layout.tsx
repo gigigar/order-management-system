@@ -2,14 +2,18 @@ import { SignOutButton } from "@/components/auth-buttons";
 import { NavLinks, type NavLink } from "@/components/nav-links";
 import { requireUser } from "@/lib/session";
 
-// Daily pages first (Dashboard and Orders join Batches as they're built).
+// Daily pages first (Dashboard joins them when it's built).
 // Setup is reference data the owners touch a few times a year.
-const dailyLinks: NavLink[] = [{ href: "/batches", label: "Batches" }];
+const dailyLinks: NavLink[] = [
+  { href: "/batches", label: "Batches" },
+  { href: "/orders", label: "Orders" },
+];
 const setupLinks: NavLink[] = [
   { href: "/areas", label: "Areas" },
   { href: "/schools", label: "Schools" },
   { href: "/agents", label: "Agents" },
   { href: "/designs", label: "Designs" },
+  { href: "/stones", label: "Stones" },
 ];
 const adminSetupLinks: NavLink[] = [{ href: "/invites", label: "Invites" }];
 
@@ -58,7 +62,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         </nav>
       </aside>
 
-      <main className="mx-auto w-full max-w-3xl p-4">{children}</main>
+      <main className="w-full max-w-6xl p-4 md:p-6">{children}</main>
     </div>
   );
 }

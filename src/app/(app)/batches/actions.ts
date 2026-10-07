@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { agentCredit, batch, design } from "@/db/schema";
 import { fieldErrorsOf, type ActionResult } from "@/lib/action-result";
+import { creditsFrom } from "@/lib/agent-credits";
 import { requireUser } from "@/lib/session";
 import { batchSchema, rowId, type BatchInput } from "@/lib/validation";
 
@@ -42,15 +43,7 @@ export async function saveBatch(
     }
   }
 
-  const credits =
-    agentId === null
-      ? []
-      : secondAgentId === null
-        ? [{ agentId, sharePercent: 100 }]
-        : [
-            { agentId, sharePercent: 100 - secondAgentShare! },
-            { agentId: secondAgentId, sharePercent: secondAgentShare! },
-          ];
+  const credits = creditsFrom({ agentId, secondAgentId, secondAgentShare });
 
   // One transaction: the Batch and its Agent credits save together or not at all.
   const savedId = await db.transaction(async (tx) => {
