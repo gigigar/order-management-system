@@ -1,0 +1,1 @@
+ALTER TABLE "item" ADD CONSTRAINT "item_batch_item_kind" CHECK ("item"."batch_id" IS NULL OR "item"."kind" IN ('pin', 'other'));

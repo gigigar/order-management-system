@@ -2,50 +2,10 @@ import { asc, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { agentCredit, item, order } from "@/db/schema";
-import type { KARATS } from "@/lib/enums";
-import { toPesos } from "@/lib/money";
 import { requireUser } from "@/lib/session";
-import type { ItemInput } from "@/lib/validation";
+import { itemInputFromRow } from "@/lib/items";
 import { batchFormOptions } from "../../batches/options";
 import { OrderForm } from "../order-form";
-
-type Karat = (typeof KARATS)[number];
-
-// Database row → form row: centavos back to pesos, and only the kind's own fields.
-// The item_*_is_complete CHECKs guarantee each kind's fields are filled, hence the !s.
-function toItemInput(row: typeof item.$inferSelect): ItemInput {
-  const base = {
-    id: row.id,
-    quantity: row.quantity,
-    unitPrice: toPesos(row.unitPrice),
-  };
-  switch (row.kind) {
-    case "ring":
-      return {
-        ...base,
-        kind: "ring",
-        ringType: row.ringType!,
-        material: row.material!,
-        // The item_karat_only_for_gold CHECK keeps it to 10, 14 or 18.
-        karat: row.karat as Karat | null,
-        size: row.size!,
-        face: row.face!,
-        stoneId: row.stoneId,
-        engraving: row.engraving,
-      };
-    case "dog_tag":
-      return {
-        ...base,
-        kind: "dog_tag",
-        birthday: row.birthday!,
-        bloodType: row.bloodType!,
-      };
-    case "pin":
-      return { ...base, kind: "pin" };
-    case "other":
-      return { ...base, kind: "other", description: row.description! };
-  }
-}
 
 export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
   await requireUser();
@@ -89,7 +49,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
           agentId: first?.agentId ?? null,
           secondAgentId: second?.agentId ?? null,
           secondAgentShare: second?.sharePercent ?? null,
-          items: items.map(toItemInput),
+          items: items.map(itemInputFromRow),
         }}
       />
     </div>

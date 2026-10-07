@@ -1,12 +1,13 @@
 import { SignOutButton } from "@/components/auth-buttons";
 import { NavLinks, type NavLink } from "@/components/nav-links";
+import { UnsavedChangesProvider } from "@/components/unsaved-changes";
 import { requireUser } from "@/lib/session";
 
 // Daily pages first (Dashboard joins them when it's built).
 // Setup is reference data the owners touch a few times a year.
 const dailyLinks: NavLink[] = [
-  { href: "/batches", label: "Batches" },
-  { href: "/orders", label: "Orders" },
+  { href: "/batches", label: "Batch orders" },
+  { href: "/orders", label: "Individual orders" },
 ];
 const setupLinks: NavLink[] = [
   { href: "/areas", label: "Areas" },
@@ -45,24 +46,29 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   );
 
   return (
-    <div className="md:flex md:min-h-screen">
-      {/* Phones: native <details> opens and closes the menu without any JavaScript. */}
-      <details className="border-b p-3 md:hidden">
-        <summary className="cursor-pointer font-medium">Menu</summary>
-        <nav aria-label="Main" className="mt-3 flex flex-col gap-3">
-          {navigation}
-          {account}
-        </nav>
-      </details>
+    <UnsavedChangesProvider>
+      <div className="md:flex md:min-h-screen">
+        {/* Phones: native <details> opens and closes the menu without any JavaScript. */}
+        <details className="border-b p-3 md:hidden">
+          <summary className="cursor-pointer font-medium">Menu</summary>
+          <nav aria-label="Main" className="mt-3 flex flex-col gap-3">
+            {navigation}
+            {account}
+          </nav>
+        </details>
 
-      <aside className="hidden w-56 shrink-0 flex-col gap-4 border-r p-4 md:flex">
-        <nav aria-label="Main" className="flex flex-1 flex-col justify-between">
-          {navigation}
-          {account}
-        </nav>
-      </aside>
+        <aside className="hidden w-56 shrink-0 flex-col gap-4 border-r p-4 md:flex">
+          <nav
+            aria-label="Main"
+            className="flex flex-1 flex-col justify-between"
+          >
+            {navigation}
+            {account}
+          </nav>
+        </aside>
 
-      <main className="w-full max-w-6xl p-4 md:p-6">{children}</main>
-    </div>
+        <main className="w-full max-w-6xl p-4 md:p-6">{children}</main>
+      </div>
+    </UnsavedChangesProvider>
   );
 }

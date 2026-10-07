@@ -2,13 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import {
   FormError,
   SelectField,
   SubmitButton,
   TextField,
 } from "@/components/form-fields";
+import { useWarnOnLeave } from "@/components/unsaved-changes";
 import { applyErrors } from "@/lib/apply-errors";
 import { PRODUCTION_STAGES, productionStageLabels } from "@/lib/enums";
 import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
@@ -19,7 +25,7 @@ import {
 } from "@/lib/validation";
 import type { BatchFormOptions } from "../batches/options";
 import { saveIndividualOrder } from "./actions";
-import { ItemFields, blankItem } from "./item-fields";
+import { ItemFields, blankItem } from "@/components/item-fields";
 
 export const emptyOrder: Omit<IndividualOrderInput, "schoolId"> = {
   customerName: "",
@@ -45,6 +51,10 @@ export function OrderForm({
   options: Options;
 }) {
   const router = useRouter();
+  const form = useForm<IndividualOrderInput>({
+    resolver: zodResolver(individualOrderSchema),
+    defaultValues: defaultValues ?? (emptyOrder as IndividualOrderInput),
+  });
   const {
     register,
     handleSubmit,
@@ -53,10 +63,8 @@ export function OrderForm({
     reset,
     control,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<IndividualOrderInput>({
-    resolver: zodResolver(individualOrderSchema),
-    defaultValues: defaultValues ?? (emptyOrder as IndividualOrderInput),
-  });
+  } = form;
+  useWarnOnLeave(isDirty);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "items",
@@ -83,139 +91,143 @@ export function OrderForm({
   });
 
   return (
-    <form
-      onSubmit={onSubmit}
-      noValidate
-      className="flex max-w-3xl flex-col gap-6"
-    >
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Customer</legend>
-        <TextField
-          label="Name"
-          error={errors.customerName?.message}
-          {...register("customerName")}
-        />
-        <TextField
-          label="Phone"
-          type="tel"
-          error={errors.customerPhone?.message}
-          {...register("customerPhone")}
-        />
-        <SelectField
-          label="School"
-          error={errors.schoolId?.message}
-          defaultValue=""
-          {...register("schoolId", { valueAsNumber: true })}
-        >
-          <option value="" disabled>
-            Choose a School
-          </option>
-          {options.schools.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} ({s.areaName})
-            </option>
-          ))}
-        </SelectField>
-        <TextField
-          label="Delivery address (optional)"
-          error={errors.address?.message}
-          {...register("address", { setValueAs: emptyToNull })}
-        />
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Items</legend>
-        {fields.map((f, index) => (
-          <ItemFields
-            key={f.id}
-            index={index}
-            stones={options.stones}
-            control={control}
-            register={register}
-            errors={errors}
-            onKindChange={(kind) => {
-              const { id, quantity, unitPrice } = getValues(`items.${index}`);
-              update(index, blankItem(kind, { id, quantity, unitPrice }));
-            }}
-            onRemove={fields.length > 1 ? () => remove(index) : undefined}
-          />
-        ))}
-        <FormError
-          message={errors.items?.message ?? errors.items?.root?.message}
-        />
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => append(blankItem("ring"))}
-            className="rounded border border-gray-400 px-3 py-1.5 text-sm"
-          >
-            Add item
-          </button>
-          <p className="font-medium">Total: {formatPesos(total)}</p>
-        </div>
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Progress</legend>
-        <TextField
-          label="Due date"
-          type="date"
-          error={errors.dueDate?.message}
-          {...register("dueDate")}
-        />
-        <SelectField
-          label="Production stage"
-          error={errors.productionStage?.message}
-          {...register("productionStage")}
-        >
-          {PRODUCTION_STAGES.map((s) => (
-            <option key={s} value={s}>
-              {productionStageLabels[s]}
-            </option>
-          ))}
-        </SelectField>
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Agents (for Commission)</legend>
-        <SelectField
-          label="Agent"
-          error={errors.agentId?.message}
-          {...register("agentId", { setValueAs: emptyToNullNumber })}
-        >
-          <option value="">None (Main office)</option>
-          {options.agents.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name} ({a.areaName})
-            </option>
-          ))}
-        </SelectField>
-        <SelectField
-          label="Second Agent (optional)"
-          error={errors.secondAgentId?.message}
-          {...register("secondAgentId", { setValueAs: emptyToNullNumber })}
-        >
-          <option value="">None</option>
-          {options.agents.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name} ({a.areaName})
-            </option>
-          ))}
-        </SelectField>
-        {hasSecondAgent && (
+    <FormProvider {...form}>
+      <form
+        onSubmit={onSubmit}
+        noValidate
+        className="flex max-w-3xl flex-col gap-6"
+      >
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-2 font-semibold">Customer</legend>
           <TextField
-            label="Second Agent's share (%)"
-            inputMode="numeric"
-            error={errors.secondAgentShare?.message}
-            {...register("secondAgentShare", { setValueAs: emptyToNullNumber })}
+            label="Name"
+            error={errors.customerName?.message}
+            {...register("customerName")}
           />
-        )}
-      </fieldset>
+          <TextField
+            label="Phone"
+            type="tel"
+            error={errors.customerPhone?.message}
+            {...register("customerPhone")}
+          />
+          <SelectField
+            label="School"
+            error={errors.schoolId?.message}
+            defaultValue=""
+            {...register("schoolId", { valueAsNumber: true })}
+          >
+            <option value="" disabled>
+              Choose a School
+            </option>
+            {options.schools.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.areaName})
+              </option>
+            ))}
+          </SelectField>
+          <TextField
+            label="Delivery address (optional)"
+            error={errors.address?.message}
+            {...register("address", { setValueAs: emptyToNull })}
+          />
+        </fieldset>
 
-      <FormError message={errors.root?.message} />
-      <SubmitButton pending={isSubmitting}>
-        {id === null ? "Create Order" : isDirty ? "Save changes" : "Saved"}
-      </SubmitButton>
-    </form>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-2 font-semibold">Items</legend>
+          {fields.map((f, index) => (
+            <ItemFields
+              key={f.id}
+              name={`items.${index}`}
+              legend={`Item ${index + 1}`}
+              stones={options.stones}
+              onKindChange={(kind) => {
+                const { id, quantity, unitPrice } = getValues(`items.${index}`);
+                update(index, blankItem(kind, { id, quantity, unitPrice }));
+              }}
+              onRemove={fields.length > 1 ? () => remove(index) : undefined}
+            />
+          ))}
+          <FormError
+            message={errors.items?.message ?? errors.items?.root?.message}
+          />
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => append(blankItem("ring"))}
+              className="rounded border border-gray-400 px-3 py-1.5 text-sm"
+            >
+              Add item
+            </button>
+            <p className="font-medium">Total: {formatPesos(total)}</p>
+          </div>
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-2 font-semibold">Progress</legend>
+          <TextField
+            label="Due date"
+            type="date"
+            error={errors.dueDate?.message}
+            {...register("dueDate")}
+          />
+          <SelectField
+            label="Production stage"
+            error={errors.productionStage?.message}
+            {...register("productionStage")}
+          >
+            {PRODUCTION_STAGES.map((s) => (
+              <option key={s} value={s}>
+                {productionStageLabels[s]}
+              </option>
+            ))}
+          </SelectField>
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-2 font-semibold">
+            Agents (for Commission)
+          </legend>
+          <SelectField
+            label="Agent"
+            error={errors.agentId?.message}
+            {...register("agentId", { setValueAs: emptyToNullNumber })}
+          >
+            <option value="">None (Main office)</option>
+            {options.agents.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name} ({a.areaName})
+              </option>
+            ))}
+          </SelectField>
+          <SelectField
+            label="Second Agent (optional)"
+            error={errors.secondAgentId?.message}
+            {...register("secondAgentId", { setValueAs: emptyToNullNumber })}
+          >
+            <option value="">None</option>
+            {options.agents.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name} ({a.areaName})
+              </option>
+            ))}
+          </SelectField>
+          {hasSecondAgent && (
+            <TextField
+              label="Second Agent's share (%)"
+              inputMode="numeric"
+              error={errors.secondAgentShare?.message}
+              {...register("secondAgentShare", {
+                setValueAs: emptyToNullNumber,
+              })}
+            />
+          )}
+        </fieldset>
+
+        <FormError message={errors.root?.message} />
+        <SubmitButton pending={isSubmitting}>
+          {id === null ? "Create Order" : isDirty ? "Save changes" : "Saved"}
+        </SubmitButton>
+      </form>
+    </FormProvider>
   );
 }

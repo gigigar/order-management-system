@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useConfirmLeave } from "./unsaved-changes";
 
 export type NavLink = { href: string; label: string };
 
 // Client component only to know the current page, for aria-current and the highlight.
 export function NavLinks({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
+  const confirmLeave = useConfirmLeave();
   return (
     <ul className="flex flex-col gap-1">
       {links.map((link) => {
@@ -18,6 +20,7 @@ export function NavLinks({ links }: { links: NavLink[] }) {
             <Link
               href={link.href}
               aria-current={current ? "page" : undefined}
+              onNavigate={confirmLeave}
               // On phones the menu is a <details>; close it after choosing a page.
               onClick={(e) =>
                 e.currentTarget.closest("details")?.removeAttribute("open")

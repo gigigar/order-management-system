@@ -248,6 +248,31 @@ export const individualOrderSchema = z
   })
   .superRefine(checkAgentCredits);
 
+// Same rule as the item_batch_item_kind CHECK.
+export const batchItemSchema = z.discriminatedUnion("kind", [
+  pinItem,
+  otherItem,
+]);
+
+// One student's row in a Batch entry table: the row's ring, then any extra items
+// (e.g. a dog tag). Payments and Agents for School orders go on the Batch.
+export const schoolOrderSchema = z.object({
+  id: rowId,
+  customerName: name,
+  // Optional: Rep lists often have no student phones (no status lookup without one).
+  customerPhone: optionalText(30),
+  items: z.tuple([ringItem], itemSchema),
+});
+
+// The whole Batch entry table, saved at once.
+export const batchEntrySchema = z.object({
+  orders: z.array(schoolOrderSchema).max(500, "500 students at most"),
+  batchItems: z.array(batchItemSchema).max(20, "20 Batch items at most"),
+});
+
+export type BatchItemInput = z.infer<typeof batchItemSchema>;
+export type SchoolOrderInput = z.infer<typeof schoolOrderSchema>;
+export type BatchEntryInput = z.infer<typeof batchEntrySchema>;
 export type ItemInput = z.infer<typeof itemSchema>;
 export type IndividualOrderInput = z.infer<typeof individualOrderSchema>;
 

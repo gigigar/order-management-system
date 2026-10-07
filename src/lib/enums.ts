@@ -40,6 +40,9 @@ export const productionStageLabels: Record<ProductionStage, string> = {
 
 export const ITEM_KINDS = ["ring", "dog_tag", "pin", "other"] as const;
 
+// Batch items are for the whole Batch; rings and dog tags are always one student's.
+export const BATCH_ITEM_KINDS = ["pin", "other"] as const;
+
 export const RING_TYPES = [
   "megabull",
   "superbull",
@@ -69,6 +72,7 @@ export const BLOOD_TYPES = [
 ] as const;
 
 export type ItemKind = (typeof ITEM_KINDS)[number];
+export type BatchItemKind = (typeof BATCH_ITEM_KINDS)[number];
 export type RingType = (typeof RING_TYPES)[number];
 export type Material = (typeof MATERIALS)[number];
 export type Face = (typeof FACES)[number];
