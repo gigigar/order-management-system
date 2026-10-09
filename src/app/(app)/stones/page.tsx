@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { stone } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { StoneForm } from "./stone-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function StonesPage() {
   await requireUser();
@@ -11,12 +12,15 @@ export default async function StonesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Stones</h1>
+      <PageHeader
+        title="Stones"
+        description="Gems a Customer can choose for a ring's Face."
+      />
       <StoneForm />
       {stones.length === 0 ? (
         <p>No Stones yet.</p>
       ) : (
-        <ul className="divide-y rounded border">
+        <ul className="divide-y rounded-xl border bg-card">
           {stones.map((a) => (
             <li key={a.id} className="flex justify-between p-3">
               <span>{a.name}</span>

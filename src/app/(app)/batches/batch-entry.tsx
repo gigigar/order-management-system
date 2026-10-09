@@ -133,7 +133,7 @@ export function BatchEntry({
     <FormProvider {...form}>
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
         <section className="flex flex-col gap-3">
-          <h2 className="font-semibold">
+          <h2 className="text-lg font-semibold tracking-tight">
             Students{" "}
             <span className="font-normal text-muted-foreground">
               ({students.fields.length})
@@ -142,7 +142,7 @@ export function BatchEntry({
           {students.fields.length > 0 && (
             <div className="overflow-x-auto rounded-xl border bg-card">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted whitespace-nowrap">
+                <thead className="bg-muted text-xs tracking-wider whitespace-nowrap text-muted-foreground uppercase">
                   <tr>
                     <th className="p-2">#</th>
                     <th className="p-2">Name</th>
@@ -181,7 +181,7 @@ export function BatchEntry({
         </section>
 
         <section className="flex max-w-3xl flex-col gap-3">
-          <h2 className="font-semibold">Batch items</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Batch items</h2>
           <p className="text-sm text-muted-foreground">
             Ordered for the whole Batch rather than one student, such as pins.
           </p>

@@ -50,7 +50,7 @@ export function PaymentForm({
     <form
       onSubmit={onSubmit}
       noValidate
-      className="grid max-w-2xl gap-3 sm:grid-cols-3"
+      className="grid max-w-2xl gap-3 rounded-xl border bg-card p-5 sm:grid-cols-3"
     >
       <TextField
         label="Amount (₱)"

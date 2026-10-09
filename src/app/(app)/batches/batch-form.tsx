@@ -76,7 +76,7 @@ export function BatchForm({
     <form
       onSubmit={onSubmit}
       noValidate
-      className="flex max-w-3xl flex-col gap-6"
+      className="flex max-w-3xl flex-col gap-6 rounded-xl border bg-card p-5"
     >
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 font-semibold">School</legend>

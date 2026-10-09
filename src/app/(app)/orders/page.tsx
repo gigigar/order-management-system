@@ -8,6 +8,16 @@ import { productionStageLabels } from "@/lib/enums";
 import { itemSummary } from "@/lib/item-summary";
 import { formatPesos } from "@/lib/money";
 import { requireUser } from "@/lib/session";
+import { PageHeader } from "@/components/page-header";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Individual orders only; School orders are listed and edited in their Batch.
 // Columns match the Batch orders page.
@@ -50,32 +60,28 @@ export default async function IndividualOrdersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Individual orders</h1>
-        <Link
-          href="/orders/new"
-          className="inline-flex min-h-11 items-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          New Individual order
-        </Link>
-      </div>
+      <PageHeader
+        title="Individual orders"
+        description="Orders from single Customers, soonest Due date first."
+        action={{ href: "/orders/new", label: "New Individual order" }}
+      />
       {rows.length === 0 ? (
         <p>No Individual orders yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-muted">
-              <tr>
-                <th className="p-3">Customer</th>
-                <th className="p-3">School</th>
-                <th className="p-3">Product</th>
-                <th className="p-3">Due date</th>
-                <th className="p-3">Production</th>
-                <th className="p-3">Code</th>
-                <th className="p-3 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+        <Card className="py-0">
+          <Table className="tabular-nums">
+            <TableHeader>
+              <TableRow className="text-xs tracking-wider text-muted-foreground uppercase">
+                <TableHead className="px-4">Customer</TableHead>
+                <TableHead className="px-4">School</TableHead>
+                <TableHead className="px-4">Product</TableHead>
+                <TableHead className="px-4">Due date</TableHead>
+                <TableHead className="px-4">Production</TableHead>
+                <TableHead className="px-4">Code</TableHead>
+                <TableHead className="px-4 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((row) => {
                 const orderItems = itemsByOrder.get(row.id) ?? [];
                 const delivered = row.productionStage === "delivered";
@@ -84,12 +90,15 @@ export default async function IndividualOrdersPage() {
                   cancelled: row.cancelledAt !== null,
                 });
                 return (
-                  <tr
+                  <TableRow
                     key={row.id}
                     className={delivered ? "text-muted-foreground" : undefined}
                   >
-                    <td className="p-3">
-                      <Link href={`/orders/${row.id}`} className="underline">
+                    <TableCell className="px-4 py-3.5 font-medium">
+                      <Link
+                        href={`/orders/${row.id}`}
+                        className="hover:text-[#8a6420] hover:underline"
+                      >
                         {row.customerName}
                       </Link>
                       {row.cancelledAt && (
@@ -97,32 +106,38 @@ export default async function IndividualOrdersPage() {
                           (cancelled)
                         </span>
                       )}
-                    </td>
-                    <td className="p-3">{row.schoolName}</td>
-                    <td className="p-3">{itemSummary(orderItems)}</td>
-                    <td className="p-3 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      {row.schoolName}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 whitespace-normal text-[#4a3b30]">
+                      {itemSummary(orderItems)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
                       {row.dueDate ?? "—"}
                       <DueBadge status={status} delivered={delivered} />
-                    </td>
-                    <td className="p-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
                       {row.productionStage &&
                         productionStageLabels[row.productionStage]}
-                    </td>
-                    <td className="p-3 font-mono">{row.code}</td>
-                    <td className="p-3 text-right whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 font-mono">
+                      {row.code}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-right">
                       {formatPesos(
                         orderItems.reduce(
                           (sum, i) => sum + i.quantity * i.unitPrice,
                           0,
                         ),
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );

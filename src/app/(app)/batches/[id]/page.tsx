@@ -5,6 +5,7 @@ import { agentCredit, batch, item, order, school } from "@/db/schema";
 import { itemInputFromRow } from "@/lib/items";
 import type { BatchItemInput, SchoolOrderInput } from "@/lib/validation";
 import { requireUser } from "@/lib/session";
+import { PageHeader } from "@/components/page-header";
 import { loadPayments } from "../../payments/load";
 import { PaymentsSection } from "../../payments/payments-section";
 import { BatchEntry } from "../batch-entry";
@@ -77,7 +78,7 @@ export default async function BatchPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Batch · {found.schoolName}</h1>
+      <PageHeader title={`Batch · ${found.schoolName}`} />
       <BatchForm
         id={b.id}
         options={options}
@@ -95,7 +96,7 @@ export default async function BatchPage({
           secondAgentShare: second?.sharePercent ?? null,
         }}
       />
-      <div className="border-t pt-4">
+      <div className="border-t border-border pt-6">
         <BatchEntry
           batchId={b.id}
           stones={options.stones}
@@ -111,7 +112,7 @@ export default async function BatchPage({
           }}
         />
       </div>
-      <div className="border-t pt-4">
+      <div className="border-t border-border pt-6">
         <PaymentsSection
           parent={{ batchId: b.id }}
           loaded={payments}

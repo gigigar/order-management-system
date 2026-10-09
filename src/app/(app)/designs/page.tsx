@@ -5,6 +5,7 @@ import { design, school } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { DesignForm } from "./design-form";
 import { schoolOptions } from "./schools";
+import { PageHeader } from "@/components/page-header";
 
 export default async function DesignsPage() {
   await requireUser();
@@ -24,7 +25,7 @@ export default async function DesignsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Designs</h1>
+      <PageHeader title="Designs" description="Each School's ring designs." />
       {schools.length === 0 ? (
         <p>
           Add a{" "}
@@ -39,7 +40,7 @@ export default async function DesignsPage() {
       {rows.length === 0 ? (
         <p>No Designs yet.</p>
       ) : (
-        <ul className="divide-y rounded border">
+        <ul className="divide-y rounded-xl border bg-card">
           {rows.map((row) => (
             <li key={row.id} className="flex justify-between gap-3 p-3">
               <span>

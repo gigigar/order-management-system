@@ -1,6 +1,7 @@
 import { asc, eq, isNotNull, sql } from "drizzle-orm";
 import Link from "next/link";
 import { DueBadge } from "@/components/due-badge";
+import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -61,22 +62,11 @@ export default async function BatchOrdersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Batch orders
-          </h1>
-          <p className="text-muted-foreground">
-            Every School&apos;s Batch, soonest Due date first.
-          </p>
-        </div>
-        <Link
-          href="/batches/new"
-          className="inline-flex min-h-11 items-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          New Batch
-        </Link>
-      </div>
+      <PageHeader
+        title="Batch orders"
+        description="Every School's Batch, soonest Due date first."
+        action={{ href: "/batches/new", label: "New Batch" }}
+      />
       {rows.length === 0 ? (
         <p>No Batches yet.</p>
       ) : (

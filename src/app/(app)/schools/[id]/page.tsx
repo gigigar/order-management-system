@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { area, school } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { SchoolForm } from "../school-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EditSchoolPage({
   params,
@@ -23,7 +24,7 @@ export default async function EditSchoolPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Edit School</h1>
+      <PageHeader title="Edit School" />
       <SchoolForm
         id={found.id}
         defaultValues={{ name: found.name, areaId: found.areaId }}

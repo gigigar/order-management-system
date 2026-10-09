@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { area } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { AreaForm } from "./area-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function AreasPage() {
   await requireUser();
@@ -11,12 +12,12 @@ export default async function AreasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Areas</h1>
+      <PageHeader title="Areas" description="Regions the Agents cover." />
       <AreaForm />
       {areas.length === 0 ? (
         <p>No Areas yet.</p>
       ) : (
-        <ul className="divide-y rounded border">
+        <ul className="divide-y rounded-xl border bg-card">
           {areas.map((a) => (
             <li key={a.id} className="flex justify-between p-3">
               <span>{a.name}</span>

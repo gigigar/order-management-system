@@ -5,6 +5,16 @@ import { productionStageLabels } from "@/lib/enums";
 import { formatPesos } from "@/lib/money";
 import { requireUser } from "@/lib/session";
 import { loadDueWork } from "./load";
+import { PageHeader } from "@/components/page-header";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function DashboardPage() {
   await requireUser();
@@ -14,7 +24,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Dashboard</h1>
+      <PageHeader
+        title="Dashboard"
+        description="Late and due-this-week work, most late first."
+      />
       <DueTable title="Overdue" empty="Nothing overdue." rows={overdue} late />
       <DueTable
         title="Due soon (next 7 days)"
@@ -44,36 +57,36 @@ function DueTable({
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{empty}</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-muted">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Due date</th>
-                <th className="p-3">Production</th>
-                <th className="p-3 text-right">Balance</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+        <Card className="py-0">
+          <Table className="tabular-nums">
+            <TableHeader>
+              <TableRow className="text-xs tracking-wider text-muted-foreground uppercase">
+                <TableHead className="px-4">Name</TableHead>
+                <TableHead className="px-4">Type</TableHead>
+                <TableHead className="px-4">Due date</TableHead>
+                <TableHead className="px-4">Production</TableHead>
+                <TableHead className="px-4 text-right">Balance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((r) => (
-                <tr key={`${r.kind}-${r.id}`}>
-                  <td className="p-3">
+                <TableRow key={`${r.kind}-${r.id}`}>
+                  <TableCell className="px-4 py-3.5">
                     <Link
                       href={
                         r.kind === "batch"
                           ? `/batches/${r.id}`
                           : `/orders/${r.id}`
                       }
-                      className="underline"
+                      className="font-medium hover:text-[#8a6420] hover:underline"
                     >
                       {r.name}
                     </Link>
-                  </td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="px-4 py-3.5">
                     {r.kind === "batch" ? "Batch" : "Individual"}
-                  </td>
-                  <td className="p-3 whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="px-4 py-3.5">
                     {r.dueDate}{" "}
                     <span
                       className={
@@ -84,18 +97,18 @@ function DueTable({
                     >
                       · {dueLabel(r.daysLeft)}
                     </span>
-                  </td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="px-4 py-3.5">
                     {r.stage ? productionStageLabels[r.stage] : "—"}
-                  </td>
-                  <td className="p-3 text-right whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="px-4 py-3.5 text-right">
                     {r.balance > 0 ? formatPesos(r.balance) : "Paid"}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </section>
   );
