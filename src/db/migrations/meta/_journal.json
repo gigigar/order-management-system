@@ -57,6 +57,13 @@
       "when": 1791373566928,
       "tag": "0007_nappy_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791550609262,
+      "tag": "0008_late_darkhawk",
+      "breakpoints": true
     }
   ]
 }

@@ -5,14 +5,16 @@ import { agentCredit, item, order } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { itemInputFromRow } from "@/lib/items";
 import { batchFormOptions } from "../../batches/options";
+import { loadPayments } from "../../payments/load";
+import { PaymentsSection } from "../../payments/payments-section";
 import { OrderForm } from "../order-form";
 
 export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
-  await requireUser();
+  const user = await requireUser();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const [[found], items, credits, options] = await Promise.all([
+  const [[found], items, credits, options, payments] = await Promise.all([
     db.select().from(order).where(eq(order.id, id)),
     db.select().from(item).where(eq(item.orderId, id)).orderBy(asc(item.id)),
     db
@@ -21,6 +23,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
       .where(eq(agentCredit.orderId, id))
       .orderBy(asc(agentCredit.id)),
     batchFormOptions(),
+    loadPayments({ orderId: id }),
   ]);
   if (!found) notFound();
   // School orders are entered and edited in their Batch.
@@ -52,6 +55,14 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
           items: items.map(itemInputFromRow),
         }}
       />
+      <div className="border-t pt-4">
+        <PaymentsSection
+          parent={{ orderId: found.id }}
+          loaded={payments}
+          agents={options.agents}
+          isAdmin={user.role === "admin"}
+        />
+      </div>
     </div>
   );
 }
