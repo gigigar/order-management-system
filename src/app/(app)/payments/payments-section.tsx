@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { todayInManila } from "@/lib/dates";
+import { formatDay, todayInManila } from "@/lib/dates";
 import { paymentMethodLabels } from "@/lib/enums";
 import { formatPesos, toPesos } from "@/lib/money";
 import { paymentSummary } from "@/lib/payments";
@@ -98,7 +98,9 @@ export function PaymentsSection({
             <TableBody>
               {payments.map(({ payment: p, agentName }) => (
                 <TableRow key={p.id}>
-                  <TableCell className="px-4 py-3.5">{p.paidOn}</TableCell>
+                  <TableCell className="px-4 py-3.5">
+                    {formatDay(p.paidOn)}
+                  </TableCell>
                   <TableCell className="px-4 py-3.5 text-right">
                     {formatPesos(p.amount)}
                   </TableCell>

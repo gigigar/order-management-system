@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { dueLabel, dueSections, type DueRow } from "@/lib/dashboard";
-import { todayInManila } from "@/lib/dates";
+import { formatDay, todayInManila } from "@/lib/dates";
 import { productionStageLabels } from "@/lib/enums";
 import { formatPesos } from "@/lib/money";
 import { requireUser } from "@/lib/session";
@@ -87,7 +87,7 @@ function DueTable({
                     {r.kind === "batch" ? "Batch" : "Individual"}
                   </TableCell>
                   <TableCell className="px-4 py-3.5">
-                    {r.dueDate}{" "}
+                    {formatDay(r.dueDate)}{" "}
                     <span
                       className={
                         late

@@ -34,3 +34,15 @@ export function daysBetween(from: string, to: string): number {
   const ms = Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`);
   return Math.round(ms / 86_400_000);
 }
+
+const dayFormat = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC", // the string is already a calendar day; don't shift it
+});
+
+// "2026-10-03" → "Oct 3, 2026", for showing dates in lists.
+export function formatDay(day: string): string {
+  return dayFormat.format(new Date(`${day}T00:00:00Z`));
+}

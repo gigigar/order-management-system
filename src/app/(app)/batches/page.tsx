@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/db";
 import { batch, item, order, school } from "@/db/schema";
-import { dueStatus, todayInManila } from "@/lib/dates";
+import { dueStatus, formatDay, todayInManila } from "@/lib/dates";
 import { dealStageLabels, productionStageLabels } from "@/lib/enums";
 import { itemSummary } from "@/lib/item-summary";
 import { formatPesos } from "@/lib/money";
@@ -60,6 +60,33 @@ export default async function BatchOrdersPage() {
   ]);
   const itemsByBatch = Map.groupBy(items, (i) => i.batchId);
 
+  // The numbers above the table. Open = not Delivered and not cancelled.
+  const open = rows.filter(
+    (r) => r.productionStage !== "delivered" && r.cancelledAt === null,
+  );
+  const statusOf = (r: (typeof rows)[number]) =>
+    dueStatus(r.dueDate, today, {
+      delivered: r.productionStage === "delivered",
+      cancelled: r.cancelledAt !== null,
+    });
+  const stats = [
+    { label: "Open Batches", value: open.length },
+    {
+      label: "Overdue",
+      value: open.filter((r) => statusOf(r) === "overdue").length,
+      className: "text-[#a3341f]",
+    },
+    {
+      label: "Due in 7 days",
+      value: open.filter((r) => statusOf(r) === "due_soon").length,
+      className: "text-[#8a5a00]",
+    },
+    {
+      label: "Students in open Batches",
+      value: open.reduce((sum, r) => sum + r.students, 0),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -67,6 +94,19 @@ export default async function BatchOrdersPage() {
         description="Every School's Batch, soonest Due date first."
         action={{ href: "/batches/new", label: "New Batch" }}
       />
+      <dl className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex flex-col gap-1.5 rounded-xl border bg-card p-4"
+          >
+            <dt className="text-sm text-muted-foreground">{stat.label}</dt>
+            <dd className={`text-2xl font-semibold ${stat.className ?? ""}`}>
+              {stat.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
       {rows.length === 0 ? (
         <p>No Batches yet.</p>
       ) : (
@@ -113,7 +153,7 @@ export default async function BatchOrdersPage() {
                       {itemSummary(batchItems)}
                     </TableCell>
                     <TableCell className="px-4 py-3.5">
-                      {row.dueDate ?? "—"}
+                      {row.dueDate ? formatDay(row.dueDate) : "—"}
                       <DueBadge status={status} delivered={delivered} />
                     </TableCell>
                     <TableCell className="px-4 py-3.5">

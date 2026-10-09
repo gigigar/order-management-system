@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DueBadge } from "@/components/due-badge";
 import { db } from "@/db";
 import { item, order, school } from "@/db/schema";
-import { dueStatus, todayInManila } from "@/lib/dates";
+import { dueStatus, formatDay, todayInManila } from "@/lib/dates";
 import { productionStageLabels } from "@/lib/enums";
 import { itemSummary } from "@/lib/item-summary";
 import { formatPesos } from "@/lib/money";
@@ -114,7 +114,7 @@ export default async function IndividualOrdersPage() {
                       {itemSummary(orderItems)}
                     </TableCell>
                     <TableCell className="px-4 py-3.5">
-                      {row.dueDate ?? "—"}
+                      {row.dueDate ? formatDay(row.dueDate) : "—"}
                       <DueBadge status={status} delivered={delivered} />
                     </TableCell>
                     <TableCell className="px-4 py-3.5">

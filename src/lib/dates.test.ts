@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, dueStatus, todayInManila } from "./dates";
+import { daysBetween, dueStatus, formatDay, todayInManila } from "./dates";
 
 describe("todayInManila", () => {
   it("is already tomorrow in Manila when it's evening in UTC", () => {
@@ -49,5 +49,11 @@ describe("daysBetween", () => {
 
   it("crosses month ends", () => {
     expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
+  });
+});
+
+describe("formatDay", () => {
+  it("shows a calendar day the way people write it", () => {
+    expect(formatDay("2026-10-03")).toBe("Oct 3, 2026");
   });
 });
