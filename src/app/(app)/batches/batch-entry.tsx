@@ -135,14 +135,14 @@ export function BatchEntry({
         <section className="flex flex-col gap-3">
           <h2 className="font-semibold">
             Students{" "}
-            <span className="font-normal text-gray-600">
+            <span className="font-normal text-muted-foreground">
               ({students.fields.length})
             </span>
           </h2>
           {students.fields.length > 0 && (
-            <div className="overflow-x-auto rounded border">
+            <div className="overflow-x-auto rounded-xl border bg-card">
               <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 whitespace-nowrap">
+                <thead className="bg-muted whitespace-nowrap">
                   <tr>
                     <th className="p-2">#</th>
                     <th className="p-2">Name</th>
@@ -174,7 +174,7 @@ export function BatchEntry({
           <button
             type="button"
             onClick={addStudent}
-            className="self-start rounded border border-gray-400 px-3 py-1.5 text-sm"
+            className="self-start rounded border border-[#8a7b6e] px-3 py-1.5 text-sm"
           >
             Add student
           </button>
@@ -182,7 +182,7 @@ export function BatchEntry({
 
         <section className="flex max-w-3xl flex-col gap-3">
           <h2 className="font-semibold">Batch items</h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Ordered for the whole Batch rather than one student, such as pins.
           </p>
           {batchItems.fields.map((f, index) => (
@@ -208,7 +208,7 @@ export function BatchEntry({
           <button
             type="button"
             onClick={() => batchItems.append(blankItem("pin"))}
-            className="self-start rounded border border-gray-400 px-3 py-1.5 text-sm"
+            className="self-start rounded border border-[#8a7b6e] px-3 py-1.5 text-sm"
           >
             Add Batch item
           </button>
@@ -284,7 +284,7 @@ function StudentRow({
   return (
     <tbody className="border-t">
       <tr className="align-top">
-        <td className="p-2 text-gray-600">{index + 1}</td>
+        <td className="p-2 text-muted-foreground">{index + 1}</td>
         <td className="p-1">
           <CellInput {...cell("customerName", "Name")} className="w-40" />
         </td>
@@ -324,7 +324,7 @@ function StudentRow({
               ))}
             </CellSelect>
           ) : (
-            <span className="block p-2 text-gray-400">—</span>
+            <span className="block p-2 text-muted-foreground">—</span>
           )}
         </td>
         <td className="p-1">
@@ -354,7 +354,7 @@ function StudentRow({
               ))}
             </CellSelect>
           ) : (
-            <span className="block p-2 text-gray-400">—</span>
+            <span className="block p-2 text-muted-foreground">—</span>
           )}
         </td>
         <td className="p-1">
@@ -443,7 +443,7 @@ function StudentRow({
 // aria-label with the student's name for screen readers.
 
 const cellClass =
-  "rounded border border-gray-400 px-2 py-1.5 aria-invalid:border-red-700 aria-invalid:bg-red-50";
+  "rounded border border-[#8a7b6e] px-2 py-1.5 aria-invalid:border-red-700 aria-invalid:bg-red-50";
 
 function CellInput({
   name,

@@ -126,7 +126,7 @@ export function PaymentsSection({
         <button
           type="button"
           onClick={() => setEditing("new")}
-          className="self-start rounded border border-gray-400 px-4 py-2"
+          className="self-start rounded border border-[#8a7b6e] px-4 py-2"
         >
           Add Payment
         </button>

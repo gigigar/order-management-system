@@ -13,7 +13,7 @@ export default async function InvitesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold">Invites</h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Only invited Google accounts can sign in. Owners can always sign in.
         </p>
       </div>
@@ -25,7 +25,8 @@ export default async function InvitesPage() {
           {invites.map((i) => (
             <li key={i.id} className="flex justify-between gap-3 p-3">
               <span>
-                {i.email} <span className="text-gray-600">· {i.role}</span>
+                {i.email}{" "}
+                <span className="text-muted-foreground">· {i.role}</span>
               </span>
               <RemoveInviteButton id={i.id} email={i.email} />
             </li>

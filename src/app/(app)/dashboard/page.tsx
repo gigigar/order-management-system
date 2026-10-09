@@ -42,11 +42,11 @@ function DueTable({
         {title} · {rows.length}
       </h2>
       {rows.length === 0 ? (
-        <p className="text-gray-600">{empty}</p>
+        <p className="text-muted-foreground">{empty}</p>
       ) : (
-        <div className="overflow-x-auto rounded border">
+        <div className="overflow-x-auto rounded-xl border bg-card">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
                 <th className="p-3">Name</th>
                 <th className="p-3">Type</th>
@@ -77,7 +77,9 @@ function DueTable({
                     {r.dueDate}{" "}
                     <span
                       className={
-                        late ? "font-medium text-red-800" : "text-gray-700"
+                        late
+                          ? "font-medium text-red-800"
+                          : "text-muted-foreground"
                       }
                     >
                       · {dueLabel(r.daysLeft)}

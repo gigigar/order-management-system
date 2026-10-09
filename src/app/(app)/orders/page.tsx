@@ -54,7 +54,7 @@ export default async function IndividualOrdersPage() {
         <h1 className="text-xl font-semibold">Individual orders</h1>
         <Link
           href="/orders/new"
-          className="rounded bg-gray-900 px-4 py-2 text-white"
+          className="inline-flex min-h-11 items-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90"
         >
           New Individual order
         </Link>
@@ -62,9 +62,9 @@ export default async function IndividualOrdersPage() {
       {rows.length === 0 ? (
         <p>No Individual orders yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded border">
+        <div className="overflow-x-auto rounded-xl border bg-card">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
                 <th className="p-3">Customer</th>
                 <th className="p-3">School</th>
@@ -86,14 +86,16 @@ export default async function IndividualOrdersPage() {
                 return (
                   <tr
                     key={row.id}
-                    className={delivered ? "text-gray-500" : undefined}
+                    className={delivered ? "text-muted-foreground" : undefined}
                   >
                     <td className="p-3">
                       <Link href={`/orders/${row.id}`} className="underline">
                         {row.customerName}
                       </Link>
                       {row.cancelledAt && (
-                        <span className="ml-2 text-gray-600">(cancelled)</span>
+                        <span className="ml-2 text-muted-foreground">
+                          (cancelled)
+                        </span>
                       )}
                     </td>
                     <td className="p-3">{row.schoolName}</td>

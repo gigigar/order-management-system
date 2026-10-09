@@ -154,7 +154,7 @@ export function OrderForm({
             <button
               type="button"
               onClick={() => append(blankItem("ring"))}
-              className="rounded border border-gray-400 px-3 py-1.5 text-sm"
+              className="rounded border border-[#8a7b6e] px-3 py-1.5 text-sm"
             >
               Add item
             </button>

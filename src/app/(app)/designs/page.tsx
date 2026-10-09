@@ -45,7 +45,7 @@ export default async function DesignsPage() {
               <span>
                 {row.schoolName}
                 {row.year !== null && ` · ${row.year}`}
-                <span className="block text-sm text-gray-600">
+                <span className="block text-sm text-muted-foreground">
                   {row.description}
                 </span>
               </span>

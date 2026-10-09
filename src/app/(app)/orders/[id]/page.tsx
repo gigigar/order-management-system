@@ -34,9 +34,9 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold">{found.customerName}</h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Individual order · code{" "}
-          <span className="font-mono text-gray-900">{found.code}</span>
+          <span className="font-mono text-foreground">{found.code}</span>
         </p>
       </div>
       <OrderForm

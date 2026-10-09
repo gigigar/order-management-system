@@ -41,7 +41,7 @@ export default async function AgentsPage() {
             <li key={row.id} className="flex justify-between gap-3 p-3">
               <span>
                 {row.name}{" "}
-                <span className="text-gray-600">· {row.areaName}</span>
+                <span className="text-muted-foreground">· {row.areaName}</span>
               </span>
               <Link href={`/agents/${row.id}`} className="underline">
                 Edit <span className="sr-only">{row.name}</span>
