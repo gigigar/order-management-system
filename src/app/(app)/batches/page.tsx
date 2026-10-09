@@ -1,6 +1,15 @@
 import { asc, eq, isNotNull, sql } from "drizzle-orm";
 import Link from "next/link";
 import { DueBadge } from "@/components/due-badge";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { batch, item, order, school } from "@/db/schema";
 import { dueStatus, todayInManila } from "@/lib/dates";
@@ -52,11 +61,18 @@ export default async function BatchOrdersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Batch orders</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Batch orders
+          </h1>
+          <p className="text-muted-foreground">
+            Every School&apos;s Batch, soonest Due date first.
+          </p>
+        </div>
         <Link
           href="/batches/new"
-          className="rounded bg-gray-900 px-4 py-2 text-white"
+          className="inline-flex min-h-11 items-center rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90"
         >
           New Batch
         </Link>
@@ -64,20 +80,20 @@ export default async function BatchOrdersPage() {
       {rows.length === 0 ? (
         <p>No Batches yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded border">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="p-3">School</th>
-                <th className="p-3">Product</th>
-                <th className="p-3">Due date</th>
-                <th className="p-3">Production</th>
-                <th className="p-3">Deal</th>
-                <th className="p-3 text-right">Students</th>
-                <th className="p-3 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+        <Card className="py-0">
+          <Table className="tabular-nums">
+            <TableHeader>
+              <TableRow className="text-xs tracking-wider text-muted-foreground uppercase">
+                <TableHead className="px-4">School</TableHead>
+                <TableHead className="px-4">Product</TableHead>
+                <TableHead className="px-4">Due date</TableHead>
+                <TableHead className="px-4">Production</TableHead>
+                <TableHead className="px-4">Deal</TableHead>
+                <TableHead className="px-4 text-right">Students</TableHead>
+                <TableHead className="px-4 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((row) => {
                 const batchItems = itemsByBatch.get(row.id) ?? [];
                 const delivered = row.productionStage === "delivered";
@@ -86,42 +102,53 @@ export default async function BatchOrdersPage() {
                   cancelled: row.cancelledAt !== null,
                 });
                 return (
-                  <tr
+                  <TableRow
                     key={row.id}
-                    className={delivered ? "text-gray-500" : undefined}
+                    className={delivered ? "text-muted-foreground" : undefined}
                   >
-                    <td className="p-3">
-                      <Link href={`/batches/${row.id}`} className="underline">
+                    <TableCell className="px-4 py-3.5 font-medium">
+                      <Link
+                        href={`/batches/${row.id}`}
+                        className="hover:text-[#8a6420] hover:underline"
+                      >
                         {row.schoolName}
                       </Link>
                       {row.cancelledAt && (
-                        <span className="ml-2 text-gray-600">(cancelled)</span>
+                        <span className="ml-2 text-muted-foreground">
+                          (cancelled)
+                        </span>
                       )}
-                    </td>
-                    <td className="p-3">{itemSummary(batchItems)}</td>
-                    <td className="p-3 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 whitespace-normal text-[#4a3b30]">
+                      {itemSummary(batchItems)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
                       {row.dueDate ?? "—"}
                       <DueBadge status={status} delivered={delivered} />
-                    </td>
-                    <td className="p-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
                       {productionStageLabels[row.productionStage]}
-                    </td>
-                    <td className="p-3">{dealStageLabels[row.dealStage]}</td>
-                    <td className="p-3 text-right">{row.students}</td>
-                    <td className="p-3 text-right whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      {dealStageLabels[row.dealStage]}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-right">
+                      {row.students}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-right">
                       {formatPesos(
                         batchItems.reduce(
                           (sum, i) => sum + i.quantity * i.unitPrice,
                           0,
                         ),
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );

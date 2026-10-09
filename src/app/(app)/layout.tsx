@@ -28,7 +28,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     <div className="flex flex-col gap-4">
       <NavLinks links={dailyLinks} />
       <div className="flex flex-col gap-1">
-        <h2 className="px-3 text-xs font-semibold tracking-wide text-gray-600 uppercase">
+        <h2 className="px-3 text-xs font-medium tracking-wider text-[#b9a894] uppercase">
           Setup
         </h2>
         <NavLinks links={setup} />
@@ -37,9 +37,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   );
 
   const account = (
-    <div className="flex flex-col gap-2 border-t pt-3 text-sm">
-      <span>
-        {user.name} ({user.role})
+    <div className="flex flex-col gap-2 border-t border-sidebar-border pt-3 text-sm">
+      <span className="text-white">
+        {user.name} <span className="text-[#b9a894]">({user.role})</span>
       </span>
       <SignOutButton />
     </div>
@@ -49,15 +49,17 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     <UnsavedChangesProvider>
       <div className="md:flex md:min-h-screen">
         {/* Phones: native <details> opens and closes the menu without any JavaScript. */}
-        <details className="border-b p-3 md:hidden">
-          <summary className="cursor-pointer font-medium">Menu</summary>
+        <details className="bg-sidebar p-3 text-sidebar-foreground md:hidden">
+          <summary className="cursor-pointer font-medium text-white">
+            Menu
+          </summary>
           <nav aria-label="Main" className="mt-3 flex flex-col gap-3">
             {navigation}
             {account}
           </nav>
         </details>
 
-        <aside className="hidden w-56 shrink-0 flex-col gap-4 border-r p-4 md:flex">
+        <aside className="hidden w-60 shrink-0 flex-col gap-4 bg-sidebar p-4 text-sidebar-foreground md:flex">
           <nav
             aria-label="Main"
             className="flex flex-1 flex-col justify-between"
@@ -67,7 +69,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           </nav>
         </aside>
 
-        <main className="w-full max-w-6xl p-4 md:p-6">{children}</main>
+        <main className="w-full max-w-6xl p-4 md:px-10 md:py-8">
+          {children}
+        </main>
       </div>
     </UnsavedChangesProvider>
   );

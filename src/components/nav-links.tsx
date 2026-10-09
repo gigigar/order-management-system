@@ -25,7 +25,7 @@ export function NavLinks({ links }: { links: NavLink[] }) {
               onClick={(e) =>
                 e.currentTarget.closest("details")?.removeAttribute("open")
               }
-              className="block rounded px-3 py-2 hover:bg-gray-100 aria-[current=page]:bg-gray-900 aria-[current=page]:text-white"
+              className="block rounded-lg px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent/60 aria-[current=page]:bg-sidebar-accent aria-[current=page]:text-sidebar-accent-foreground aria-[current=page]:shadow-[inset_3px_0_0_var(--sidebar-primary)]"
             >
               {link.label}
             </Link>
