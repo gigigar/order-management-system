@@ -5,8 +5,8 @@ import { auth } from "@/lib/auth";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   const session = await auth.api.getSession({ headers: await headers() });
-  // The dashboard will live here; until then, signed-in users start at Batches.
-  if (session) redirect("/batches");
+  // Signed-in users start at the Dashboard: what's late comes first.
+  if (session) redirect("/dashboard");
   const { error } = await searchParams;
 
   return (

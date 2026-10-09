@@ -8,7 +8,7 @@ export function todayInManila(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE }).format(now);
 }
 
-function addDays(day: string, days: number): string {
+export function addDays(day: string, days: number): string {
   const date = new Date(`${day}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
@@ -27,4 +27,10 @@ export function dueStatus(
   if (dueDate < today) return "overdue";
   if (dueDate <= addDays(today, 7)) return "due_soon";
   return null;
+}
+
+// Whole days from one calendar day to another: negative when `to` is earlier.
+export function daysBetween(from: string, to: string): number {
+  const ms = Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`);
+  return Math.round(ms / 86_400_000);
 }

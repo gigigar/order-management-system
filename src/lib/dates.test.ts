@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dueStatus, todayInManila } from "./dates";
+import { daysBetween, dueStatus, todayInManila } from "./dates";
 
 describe("todayInManila", () => {
   it("is already tomorrow in Manila when it's evening in UTC", () => {
@@ -38,5 +38,16 @@ describe("dueStatus", () => {
       dueStatus(late, today, { delivered: false, cancelled: true }),
     ).toBeNull();
     expect(dueStatus(null, today, open)).toBeNull();
+  });
+});
+
+describe("daysBetween", () => {
+  it("counts calendar days, negative going back", () => {
+    expect(daysBetween("2026-10-09", "2026-10-16")).toBe(7);
+    expect(daysBetween("2026-10-09", "2026-10-06")).toBe(-3);
+  });
+
+  it("crosses month ends", () => {
+    expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
   });
 });
