@@ -64,22 +64,15 @@ export default async function BatchOrdersPage() {
   const open = rows.filter(
     (r) => r.productionStage !== "delivered" && r.cancelledAt === null,
   );
-  const statusOf = (r: (typeof rows)[number]) =>
-    dueStatus(r.dueDate, today, {
-      delivered: r.productionStage === "delivered",
-      cancelled: r.cancelledAt !== null,
-    });
+  const ringsIn = (batchId: number) =>
+    (itemsByBatch.get(batchId) ?? [])
+      .filter((i) => i.kind === "ring")
+      .reduce((sum, i) => sum + i.quantity, 0);
   const stats = [
     { label: "Open Batches", value: open.length },
     {
-      label: "Overdue",
-      value: open.filter((r) => statusOf(r) === "overdue").length,
-      className: "text-[#a3341f]",
-    },
-    {
-      label: "Due in 7 days",
-      value: open.filter((r) => statusOf(r) === "due_soon").length,
-      className: "text-[#8a5a00]",
+      label: "Rings in open Batches",
+      value: open.reduce((sum, r) => sum + ringsIn(r.id), 0),
     },
     {
       label: "Students in open Batches",
@@ -101,7 +94,7 @@ export default async function BatchOrdersPage() {
             className="flex flex-col gap-1.5 rounded-xl border bg-card p-4"
           >
             <dt className="text-sm text-muted-foreground">{stat.label}</dt>
-            <dd className={`text-2xl font-semibold ${stat.className ?? ""}`}>
+            <dd className="text-2xl font-semibold tabular-nums">
               {stat.value}
             </dd>
           </div>
