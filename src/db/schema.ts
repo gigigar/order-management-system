@@ -19,6 +19,7 @@ import {
   FACES,
   ITEM_KINDS,
   MATERIALS,
+  PAYMENT_METHODS,
   PRODUCTION_STAGES,
   RING_TYPES,
 } from "../lib/enums";
@@ -126,14 +127,7 @@ export const face = pgEnum("face", FACES);
 
 export const bloodType = pgEnum("blood_type", BLOOD_TYPES);
 
-export const paymentKind = pgEnum("payment_kind", ["deposit", "balance"]);
-
-export const paymentMethod = pgEnum("payment_method", [
-  "cash",
-  "gcash",
-  "bank",
-  "check",
-]);
+export const paymentMethod = pgEnum("payment_method", PAYMENT_METHODS);
 
 // Money is integer centavos.
 
@@ -304,7 +298,6 @@ export const payment = pgTable(
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     batchId: integer().references(() => batch.id, { onDelete: "restrict" }),
     orderId: integer().references(() => order.id, { onDelete: "restrict" }),
-    kind: paymentKind().notNull(),
     amount: integer().notNull(),
     method: paymentMethod().notNull(),
     // Null = paid straight to the Main office.

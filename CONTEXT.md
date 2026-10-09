@@ -114,7 +114,7 @@ _Avoid_: Released, completed, picked up
 ### Money
 
 **Deposit**:
-The first payment, due before production. It is not refunded.
+The first payment, due before production. It is not refunded. Not stored separately: it is the earliest Payment.
 _Avoid_: Down payment, advance
 
 **Balance**:

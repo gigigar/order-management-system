@@ -104,3 +104,16 @@ export const faceLabels: Record<Face, string> = {
   stone: "Stone",
   logo: "Logo",
 };
+
+// Payment values, also shared by the schema and the UI.
+
+export const PAYMENT_METHODS = ["cash", "gcash", "bank", "check"] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const paymentMethodLabels: Record<PaymentMethod, string> = {
+  cash: "Cash",
+  gcash: "GCash",
+  bank: "Bank transfer",
+  check: "Check",
+};

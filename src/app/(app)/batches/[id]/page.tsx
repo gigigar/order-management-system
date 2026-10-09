@@ -5,6 +5,8 @@ import { agentCredit, batch, item, order, school } from "@/db/schema";
 import { itemInputFromRow } from "@/lib/items";
 import type { BatchItemInput, SchoolOrderInput } from "@/lib/validation";
 import { requireUser } from "@/lib/session";
+import { loadPayments } from "../../payments/load";
+import { PaymentsSection } from "../../payments/payments-section";
 import { BatchEntry } from "../batch-entry";
 import { BatchForm } from "../batch-form";
 import { batchFormOptions } from "../options";
@@ -23,41 +25,47 @@ function ringFirst(
 export default async function BatchPage({
   params,
 }: PageProps<"/batches/[id]">) {
-  await requireUser();
+  const user = await requireUser();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const [[found], credits, options, orders, items] = await Promise.all([
-    db
-      .select({ batch, schoolName: school.name })
-      .from(batch)
-      .innerJoin(school, eq(batch.schoolId, school.id))
-      .where(eq(batch.id, id)),
-    db
-      .select()
-      .from(agentCredit)
-      .where(eq(agentCredit.batchId, id))
-      .orderBy(agentCredit.id),
-    batchFormOptions(),
-    db.select().from(order).where(eq(order.batchId, id)).orderBy(asc(order.id)),
-    // The Batch's own items and its School orders' items, in one query.
-    db
-      .select()
-      .from(item)
-      .where(
-        or(
-          eq(item.batchId, id),
-          inArray(
-            item.orderId,
-            db
-              .select({ id: order.id })
-              .from(order)
-              .where(eq(order.batchId, id)),
+  const [[found], credits, options, orders, items, payments] =
+    await Promise.all([
+      db
+        .select({ batch, schoolName: school.name })
+        .from(batch)
+        .innerJoin(school, eq(batch.schoolId, school.id))
+        .where(eq(batch.id, id)),
+      db
+        .select()
+        .from(agentCredit)
+        .where(eq(agentCredit.batchId, id))
+        .orderBy(agentCredit.id),
+      batchFormOptions(),
+      db
+        .select()
+        .from(order)
+        .where(eq(order.batchId, id))
+        .orderBy(asc(order.id)),
+      // The Batch's own items and its School orders' items, in one query.
+      db
+        .select()
+        .from(item)
+        .where(
+          or(
+            eq(item.batchId, id),
+            inArray(
+              item.orderId,
+              db
+                .select({ id: order.id })
+                .from(order)
+                .where(eq(order.batchId, id)),
+            ),
           ),
-        ),
-      )
-      .orderBy(asc(item.id)),
-  ]);
+        )
+        .orderBy(asc(item.id)),
+      loadPayments({ batchId: id }),
+    ]);
   const batchItems = items.filter((i) => i.batchId === id);
   const itemsByOrder = Map.groupBy(
     items.filter((i) => i.orderId !== null),
@@ -101,6 +109,14 @@ export default async function BatchPage({
             // The item_batch_item_kind CHECK keeps these to pins and other items.
             batchItems: batchItems.map(itemInputFromRow) as BatchItemInput[],
           }}
+        />
+      </div>
+      <div className="border-t pt-4">
+        <PaymentsSection
+          parent={{ batchId: b.id }}
+          loaded={payments}
+          agents={options.agents}
+          isAdmin={user.role === "admin"}
         />
       </div>
     </div>

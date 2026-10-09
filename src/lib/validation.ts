@@ -5,6 +5,7 @@ import {
   FACES,
   KARATS,
   MATERIALS,
+  PAYMENT_METHODS,
   PRODUCTION_STAGES,
   RING_TYPES,
 } from "./enums";
@@ -270,6 +271,18 @@ export const batchEntrySchema = z.object({
   batchItems: z.array(batchItemSchema).max(20, "20 Batch items at most"),
 });
 
+// Where a Payment goes (Batch or Individual order) comes from the page, not the form;
+// the Server Action checks it, since that needs a database lookup.
+export const paymentSchema = z.object({
+  // Same rules as a price, but a Payment of 0 means nothing was paid (DB CHECK too).
+  amount: pesos("Enter the amount").refine((p) => p > 0, "Enter the amount"),
+  method: z.enum(PAYMENT_METHODS),
+  // Null = paid straight to the Main office.
+  collectedByAgentId: optionalId,
+  receiptNo: optionalText(50),
+  paidOn: z.iso.date("Enter the date paid"),
+});
+
 export type BatchItemInput = z.infer<typeof batchItemSchema>;
 export type SchoolOrderInput = z.infer<typeof schoolOrderSchema>;
 export type BatchEntryInput = z.infer<typeof batchEntrySchema>;
@@ -282,3 +295,4 @@ export type AgentInput = z.infer<typeof agentSchema>;
 export type StoneInput = z.infer<typeof stoneSchema>;
 export type DesignInput = z.infer<typeof designSchema>;
 export type InviteInput = z.infer<typeof inviteSchema>;
+export type PaymentInput = z.infer<typeof paymentSchema>;
