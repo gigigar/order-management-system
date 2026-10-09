@@ -64,12 +64,8 @@
           "name": "agent_user_id_user_id_fk",
           "tableFrom": "agent",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -77,12 +73,8 @@
           "name": "agent_area_id_area_id_fk",
           "tableFrom": "agent",
           "tableTo": "area",
-          "columnsFrom": [
-            "area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["area_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -92,9 +84,7 @@
         "agent_user_id_unique": {
           "name": "agent_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -167,12 +157,8 @@
           "name": "agent_credit_batch_id_batch_id_fk",
           "tableFrom": "agent_credit",
           "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["batch_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -180,12 +166,8 @@
           "name": "agent_credit_order_id_order_id_fk",
           "tableFrom": "agent_credit",
           "tableTo": "order",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -193,12 +175,8 @@
           "name": "agent_credit_agent_id_agent_id_fk",
           "tableFrom": "agent_credit",
           "tableTo": "agent",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -208,18 +186,12 @@
         "agent_credit_batch_agent_unique": {
           "name": "agent_credit_batch_agent_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "batch_id",
-            "agent_id"
-          ]
+          "columns": ["batch_id", "agent_id"]
         },
         "agent_credit_order_agent_unique": {
           "name": "agent_credit_order_agent_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "order_id",
-            "agent_id"
-          ]
+          "columns": ["order_id", "agent_id"]
         }
       },
       "policies": {},
@@ -284,9 +256,7 @@
         "area_name_unique": {
           "name": "area_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -422,12 +392,8 @@
           "name": "batch_school_id_school_id_fk",
           "tableFrom": "batch",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -435,12 +401,8 @@
           "name": "batch_design_id_design_id_fk",
           "tableFrom": "batch",
           "tableTo": "design",
-          "columnsFrom": [
-            "design_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["design_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -448,12 +410,8 @@
           "name": "batch_created_by_user_id_fk",
           "tableFrom": "batch",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -461,12 +419,8 @@
           "name": "batch_updated_by_user_id_fk",
           "tableFrom": "batch",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -542,12 +496,8 @@
           "name": "design_school_id_school_id_fk",
           "tableFrom": "design",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -615,9 +565,7 @@
         "invite_email_unique": {
           "name": "invite_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -767,12 +715,8 @@
           "name": "item_order_id_order_id_fk",
           "tableFrom": "item",
           "tableTo": "order",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -780,12 +724,8 @@
           "name": "item_batch_id_batch_id_fk",
           "tableFrom": "item",
           "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["batch_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -793,12 +733,8 @@
           "name": "item_stone_id_stone_id_fk",
           "tableFrom": "item",
           "tableTo": "stone",
-          "columnsFrom": [
-            "stone_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["stone_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -976,12 +912,8 @@
           "name": "order_batch_id_batch_id_fk",
           "tableFrom": "order",
           "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["batch_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -989,12 +921,8 @@
           "name": "order_school_id_school_id_fk",
           "tableFrom": "order",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1002,12 +930,8 @@
           "name": "order_created_by_user_id_fk",
           "tableFrom": "order",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1015,12 +939,8 @@
           "name": "order_updated_by_user_id_fk",
           "tableFrom": "order",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1030,9 +950,7 @@
         "order_code_unique": {
           "name": "order_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -1145,12 +1063,8 @@
           "name": "payment_batch_id_batch_id_fk",
           "tableFrom": "payment",
           "tableTo": "batch",
-          "columnsFrom": [
-            "batch_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["batch_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1158,12 +1072,8 @@
           "name": "payment_order_id_order_id_fk",
           "tableFrom": "payment",
           "tableTo": "order",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1171,12 +1081,8 @@
           "name": "payment_collected_by_agent_id_agent_id_fk",
           "tableFrom": "payment",
           "tableTo": "agent",
-          "columnsFrom": [
-            "collected_by_agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["collected_by_agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1184,12 +1090,8 @@
           "name": "payment_created_by_user_id_fk",
           "tableFrom": "payment",
           "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1197,12 +1099,8 @@
           "name": "payment_updated_by_user_id_fk",
           "tableFrom": "payment",
           "tableTo": "user",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1276,12 +1174,8 @@
           "name": "school_area_id_area_id_fk",
           "tableFrom": "school",
           "tableTo": "area",
-          "columnsFrom": [
-            "area_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["area_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1291,10 +1185,7 @@
         "school_area_id_name_unique": {
           "name": "school_area_id_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "area_id",
-            "name"
-          ]
+          "columns": ["area_id", "name"]
         }
       },
       "policies": {},
@@ -1350,9 +1241,7 @@
         "stone_name_unique": {
           "name": "stone_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -1465,12 +1354,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1557,12 +1442,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1572,9 +1453,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1645,9 +1524,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1726,62 +1603,32 @@
     "public.blood_type": {
       "name": "blood_type",
       "schema": "public",
-      "values": [
-        "A+",
-        "A-",
-        "B+",
-        "B-",
-        "AB+",
-        "AB-",
-        "O+",
-        "O-"
-      ]
+      "values": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
     },
     "public.deal_stage": {
       "name": "deal_stage",
       "schema": "public",
-      "values": [
-        "meeting",
-        "design_presented",
-        "agreement_signed"
-      ]
+      "values": ["meeting", "design_presented", "agreement_signed"]
     },
     "public.face": {
       "name": "face",
       "schema": "public",
-      "values": [
-        "stone",
-        "logo"
-      ]
+      "values": ["stone", "logo"]
     },
     "public.item_kind": {
       "name": "item_kind",
       "schema": "public",
-      "values": [
-        "ring",
-        "dog_tag",
-        "pin",
-        "other"
-      ]
+      "values": ["ring", "dog_tag", "pin", "other"]
     },
     "public.material": {
       "name": "material",
       "schema": "public",
-      "values": [
-        "gold",
-        "silver",
-        "velum"
-      ]
+      "values": ["gold", "silver", "velum"]
     },
     "public.payment_method": {
       "name": "payment_method",
       "schema": "public",
-      "values": [
-        "cash",
-        "gcash",
-        "bank",
-        "check"
-      ]
+      "values": ["cash", "gcash", "bank", "check"]
     },
     "public.production_stage": {
       "name": "production_stage",
@@ -1812,10 +1659,7 @@
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "admin",
-        "member"
-      ]
+      "values": ["admin", "member"]
     }
   },
   "schemas": {},
