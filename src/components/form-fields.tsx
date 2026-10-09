@@ -27,7 +27,7 @@ function Field({
 }
 
 const inputClass =
-  "rounded border border-gray-400 px-3 py-2 aria-invalid:border-red-700";
+  "rounded-lg border border-[#8a7b6e] bg-white px-3 py-2 aria-invalid:border-red-700";
 
 export function TextField({
   label,
@@ -72,7 +72,7 @@ export function SelectField({
           aria-hidden="true"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-gray-600"
+          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
         >
           <path
             fillRule="evenodd"
@@ -105,7 +105,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={pending}
-      className="self-start rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
+      className="inline-flex min-h-11 items-center self-start rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
     >
       {pending ? "Saving…" : children}
     </button>

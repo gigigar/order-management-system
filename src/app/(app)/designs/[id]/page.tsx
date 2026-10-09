@@ -5,6 +5,7 @@ import { design } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { DesignForm } from "../design-form";
 import { schoolOptions } from "../schools";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EditDesignPage({
   params,
@@ -21,7 +22,7 @@ export default async function EditDesignPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Edit Design</h1>
+      <PageHeader title="Edit Design" />
       <DesignForm
         id={found.id}
         defaultValues={{

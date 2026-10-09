@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { area, agent } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { AgentForm } from "../agent-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EditAgentPage({
   params,
@@ -23,7 +24,7 @@ export default async function EditAgentPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Edit Agent</h1>
+      <PageHeader title="Edit Agent" />
       <AgentForm
         id={found.id}
         defaultValues={{ name: found.name, areaId: found.areaId }}

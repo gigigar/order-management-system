@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { area } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { AreaForm } from "../area-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EditAreaPage({
   params,
@@ -17,7 +18,7 @@ export default async function EditAreaPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Edit Area</h1>
+      <PageHeader title="Edit Area" />
       <AreaForm id={found.id} defaultValues={{ name: found.name }} />
     </div>
   );

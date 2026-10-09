@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { agentCredit, item, order } from "@/db/schema";
 import { requireUser } from "@/lib/session";
+import { PageHeader } from "@/components/page-header";
 import { itemInputFromRow } from "@/lib/items";
 import { batchFormOptions } from "../../batches/options";
 import { loadPayments } from "../../payments/load";
@@ -32,13 +33,15 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold">{found.customerName}</h1>
-        <p className="text-sm text-gray-600">
-          Individual order · code{" "}
-          <span className="font-mono text-gray-900">{found.code}</span>
-        </p>
-      </div>
+      <PageHeader
+        title={found.customerName}
+        description={
+          <>
+            Individual order · code{" "}
+            <span className="font-mono text-foreground">{found.code}</span>
+          </>
+        }
+      />
       <OrderForm
         id={found.id}
         options={options}
@@ -55,7 +58,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
           items: items.map(itemInputFromRow),
         }}
       />
-      <div className="border-t pt-4">
+      <div className="border-t border-border pt-6">
         <PaymentsSection
           parent={{ orderId: found.id }}
           loaded={payments}

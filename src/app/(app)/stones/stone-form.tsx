@@ -38,7 +38,7 @@ export function StoneForm({
     <form
       onSubmit={onSubmit}
       noValidate
-      className="flex max-w-md flex-col gap-3"
+      className="flex max-w-md flex-col gap-3 rounded-xl border bg-card p-5"
     >
       <TextField
         label="Name"

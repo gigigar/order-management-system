@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { area, agent } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { AgentForm } from "./agent-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function AgentsPage() {
   await requireUser();
@@ -21,7 +22,10 @@ export default async function AgentsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Agents</h1>
+      <PageHeader
+        title="Agents"
+        description="Agents and the Area each one covers."
+      />
       {areas.length === 0 ? (
         <p>
           Add an{" "}
@@ -36,12 +40,12 @@ export default async function AgentsPage() {
       {rows.length === 0 ? (
         <p>No Agents yet.</p>
       ) : (
-        <ul className="divide-y rounded border">
+        <ul className="divide-y rounded-xl border bg-card">
           {rows.map((row) => (
             <li key={row.id} className="flex justify-between gap-3 p-3">
               <span>
                 {row.name}{" "}
-                <span className="text-gray-600">· {row.areaName}</span>
+                <span className="text-muted-foreground">· {row.areaName}</span>
               </span>
               <Link href={`/agents/${row.id}`} className="underline">
                 Edit <span className="sr-only">{row.name}</span>

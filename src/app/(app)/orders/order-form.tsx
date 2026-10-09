@@ -95,7 +95,7 @@ export function OrderForm({
       <form
         onSubmit={onSubmit}
         noValidate
-        className="flex max-w-3xl flex-col gap-6"
+        className="flex max-w-3xl flex-col gap-6 rounded-xl border bg-card p-5"
       >
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-2 font-semibold">Customer</legend>
@@ -154,7 +154,7 @@ export function OrderForm({
             <button
               type="button"
               onClick={() => append(blankItem("ring"))}
-              className="rounded border border-gray-400 px-3 py-1.5 text-sm"
+              className="rounded border border-[#8a7b6e] px-3 py-1.5 text-sm"
             >
               Add item
             </button>

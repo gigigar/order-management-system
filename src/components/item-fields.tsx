@@ -244,7 +244,7 @@ export function ItemFields({
             </SelectField>
           </div>
           {/* Philippine Data Privacy Act: say why sensitive data is collected (design doc). */}
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Birthday and blood type are collected only to engrave this dog tag.
             They are never shown on the public order status page.
           </p>

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { stone } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { StoneForm } from "../stone-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EditStonePage({
   params,
@@ -17,7 +18,7 @@ export default async function EditStonePage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Edit Stone</h1>
+      <PageHeader title="Edit Stone" />
       <StoneForm id={found.id} defaultValues={{ name: found.name }} />
     </div>
   );
