@@ -3,9 +3,9 @@ import { NavLinks, type NavLink } from "@/components/nav-links";
 import { UnsavedChangesProvider } from "@/components/unsaved-changes";
 import { requireUser } from "@/lib/session";
 
-// Daily pages first (Dashboard joins them when it's built).
-// Setup is reference data the owners touch a few times a year.
+// Daily pages first. Setup is reference data the owners touch a few times a year.
 const dailyLinks: NavLink[] = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/batches", label: "Batch orders" },
   { href: "/orders", label: "Individual orders" },
 ];
