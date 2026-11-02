@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, notInArray } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -54,6 +54,31 @@ export async function saveBatch(
       return {
         ok: false,
         fieldErrors: { designId: "That Design belongs to another School." },
+      };
+    }
+  }
+
+  // A Batch can't be Delivered while a student is held back at an earlier Stage.
+  // Students following the Batch have a null Stage, and NULL <> 'delivered' is
+  // never true in SQL, so ne() already leaves them out.
+  if (parsedId !== null && fields.productionStage === "delivered") {
+    const held = await db
+      .select({ customerName: order.customerName })
+      .from(order)
+      .where(
+        and(
+          eq(order.batchId, parsedId),
+          ne(order.productionStage, "delivered"),
+          isNull(order.cancelledAt),
+        ),
+      );
+    if (held.length > 0) {
+      const names = held.map((o) => o.customerName).join(", ");
+      return {
+        ok: false,
+        fieldErrors: {
+          productionStage: `Still held back: ${names}. Move them to Delivered first.`,
+        },
       };
     }
   }
