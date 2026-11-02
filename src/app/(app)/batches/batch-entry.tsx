@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { type ComponentProps } from "react";
+import { useEffect, type ComponentProps } from "react";
 import {
   FormProvider,
   get,
@@ -20,12 +20,15 @@ import {
   FACES,
   KARATS,
   MATERIALS,
+  PRODUCTION_STAGES,
   RING_TYPES,
   faceLabels,
   materialLabels,
+  productionStageLabels,
   ringTypeLabels,
   type BatchItemKind,
   type ItemKind,
+  type ProductionStage,
 } from "@/lib/enums";
 import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
 import { formatPesos, toCentavos } from "@/lib/money";
@@ -56,7 +59,13 @@ function newStudent(above?: Ring): SchoolOrderInput {
     size: null,
     engraving: null,
   } as unknown as Ring; // blanks are filled in before save; the schema checks them
-  return { id: null, customerName: "", customerPhone: null, items: [ring] };
+  return {
+    id: null,
+    customerName: "",
+    customerPhone: null,
+    productionStage: null,
+    items: [ring],
+  };
 }
 
 // Line totals while typing; blank or invalid numbers count as 0.
@@ -69,10 +78,12 @@ function totalOf(items: { quantity?: number; unitPrice?: number }[]) {
 
 export function BatchEntry({
   batchId,
+  batchStage,
   defaultValues,
   stones,
 }: {
   batchId: number;
+  batchStage: ProductionStage;
   defaultValues: BatchEntryInput;
   stones: Stone[];
 }) {
@@ -86,6 +97,7 @@ export function BatchEntry({
     getValues,
     handleSubmit,
     reset,
+    resetField,
     setError,
     formState: { errors, isDirty, isSubmitting },
   } = form;
@@ -94,6 +106,25 @@ export function BatchEntry({
 
   // A Rep's list can be 40+ students: warn before leaving with unsaved rows.
   useWarnOnLeave(isDirty);
+
+  // Saving the Batch form above can make students rejoin. Clear those holds here too,
+  // or this table's next save would bring them back. Other unsaved edits stay.
+  useEffect(() => {
+    const rejoined = new Set(
+      defaultValues.orders.flatMap((o) =>
+        o.id !== null && o.productionStage === null ? [o.id] : [],
+      ),
+    );
+    getValues("orders").forEach((row, index) => {
+      if (
+        row.id !== null &&
+        rejoined.has(row.id) &&
+        row.productionStage === batchStage
+      ) {
+        resetField(`orders.${index}.productionStage`, { defaultValue: null });
+      }
+    });
+  }, [batchStage, defaultValues.orders, getValues, resetField]);
 
   const orders = useWatch({ control, name: "orders" });
   const extras = useWatch({ control, name: "batchItems" });
@@ -116,6 +147,7 @@ export function BatchEntry({
       orders: values.orders.map((o, k) => ({
         ...o,
         id: result.orders[k].id,
+        productionStage: result.orders[k].productionStage,
         items: o.items.map((i, j) => ({
           ...i,
           id: result.orders[k].itemIds[j],
@@ -164,6 +196,7 @@ export function BatchEntry({
                   <StudentRow
                     key={f.id}
                     index={index}
+                    batchStage={batchStage}
                     stones={stones}
                     onRemove={() => students.remove(index)}
                   />
@@ -242,22 +275,26 @@ const ringErrorLabels: [string, string][] = [
   ["items.0.stoneId", "Stone"],
   ["items.0.engraving", "Engraving"],
   ["items.0.unitPrice", "Price"],
+  ["productionStage", "Held back at"],
 ];
 
 // One student: a table row for their ring, plus any extra items (e.g. a dog tag)
 // and error messages in rows underneath. Paths are runtime strings, like ItemFields.
 function StudentRow({
   index,
+  batchStage,
   stones,
   onRemove,
 }: {
   index: number;
+  batchStage: ProductionStage;
   stones: Stone[];
   onRemove: () => void;
 }) {
   const {
     control,
     getValues,
+    setValue,
     formState: { errors },
   } = useFormContext();
   const row = `orders.${index}`;
@@ -266,7 +303,10 @@ function StudentRow({
   const material = useWatch({ control, name: `${ring}.material` });
   const face = useWatch({ control, name: `${ring}.face` });
   const customerName = useWatch({ control, name: `${row}.customerName` });
+  const heldStage = useWatch({ control, name: `${row}.productionStage` });
   const who = customerName || `student ${index + 1}`;
+  const setHold = (stage: ProductionStage | null) =>
+    setValue(`${row}.productionStage`, stage, { shouldDirty: true });
 
   const rowErrors = ringErrorLabels.flatMap(([field, label]) => {
     const message: string | undefined = get(errors, `${row}.${field}`)?.message;
@@ -380,6 +420,15 @@ function StudentRow({
           >
             + Item<span className="sr-only"> for {who}</span>
           </button>
+          {!heldStage && batchStage !== "delivered" && (
+            <button
+              type="button"
+              onClick={() => setHold(batchStage)}
+              className="p-2 text-sm underline"
+            >
+              Hold back<span className="sr-only"> {who}</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={onRemove}
@@ -389,6 +438,34 @@ function StudentRow({
           </button>
         </td>
       </tr>
+
+      {heldStage && (
+        <tr>
+          <td />
+          <td colSpan={11} className="px-2 pb-3">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="font-medium">Held back at</span>
+              <CellSelect {...cell("productionStage", "Held back at")}>
+                {PRODUCTION_STAGES.map((s) => (
+                  <option key={s} value={s}>
+                    {productionStageLabels[s]}
+                  </option>
+                ))}
+              </CellSelect>
+              <span className="text-muted-foreground">
+                Rejoins the Batch when this Stage reaches the Batch&apos;s.
+              </span>
+              <button
+                type="button"
+                onClick={() => setHold(null)}
+                className="p-2 text-red-700 underline"
+              >
+                Remove hold<span className="sr-only"> for {who}</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      )}
 
       {rowErrors.length > 0 && (
         <tr>

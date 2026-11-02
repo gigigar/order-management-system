@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, notInArray } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -12,6 +12,8 @@ import {
 import { agentCredit, batch, design, item, order } from "@/db/schema";
 import { fieldErrorsOf, type ActionResult } from "@/lib/action-result";
 import { creditsFrom } from "@/lib/agent-credits";
+import type { ProductionStage } from "@/lib/enums";
+import { heldStageToSave } from "@/lib/hold-back";
 import { generateOrderCode } from "@/lib/order-code";
 import { requireUser } from "@/lib/session";
 import {
@@ -56,6 +58,31 @@ export async function saveBatch(
     }
   }
 
+  // A Batch can't be Delivered while a student is held back at an earlier Stage.
+  // Students following the Batch have a null Stage, and NULL <> 'delivered' is
+  // never true in SQL, so ne() already leaves them out.
+  if (parsedId !== null && fields.productionStage === "delivered") {
+    const held = await db
+      .select({ customerName: order.customerName })
+      .from(order)
+      .where(
+        and(
+          eq(order.batchId, parsedId),
+          ne(order.productionStage, "delivered"),
+          isNull(order.cancelledAt),
+        ),
+      );
+    if (held.length > 0) {
+      const names = held.map((o) => o.customerName).join(", ");
+      return {
+        ok: false,
+        fieldErrors: {
+          productionStage: `Still held back: ${names}. Move them to Delivered first.`,
+        },
+      };
+    }
+  }
+
   const credits = creditsFrom({ agentId, secondAgentId, secondAgentShare });
 
   // One transaction: the Batch and its Agent credits save together or not at all.
@@ -68,6 +95,10 @@ export async function saveBatch(
         .returning({ id: batch.id });
       batchId = created.id;
     } else {
+      const [previous] = await tx
+        .select({ productionStage: batch.productionStage })
+        .from(batch)
+        .where(eq(batch.id, parsedId));
       const [updated] = await tx
         .update(batch)
         .set({ ...fields, updatedBy: user.id })
@@ -76,6 +107,18 @@ export async function saveBatch(
       if (!updated) return null;
       batchId = updated.id;
       await tx.delete(agentCredit).where(eq(agentCredit.batchId, batchId));
+      // The Batch's Stage changed: students held at the new Stage rejoin it.
+      if (previous.productionStage !== fields.productionStage) {
+        await tx
+          .update(order)
+          .set({ productionStage: null, updatedBy: user.id })
+          .where(
+            and(
+              eq(order.batchId, batchId),
+              eq(order.productionStage, fields.productionStage),
+            ),
+          );
+      }
     }
     if (credits.length > 0) {
       await tx
@@ -96,7 +139,12 @@ type SaveBatchEntryResult =
   | {
       ok: true;
       // In the same order as sent, so the table can fill in new ids.
-      orders: { id: number; itemIds: number[] }[];
+      // productionStage: what was stored, null if the student rejoined the Batch.
+      orders: {
+        id: number;
+        itemIds: number[];
+        productionStage: ProductionStage | null;
+      }[];
       batchItemIds: number[];
     }
   | Extract<ActionResult, { ok: false }>;
@@ -115,10 +163,34 @@ export async function saveBatchEntry(
   const { orders, batchItems } = parsed.data;
 
   const [found] = await db
-    .select({ schoolId: batch.schoolId })
+    .select({
+      schoolId: batch.schoolId,
+      productionStage: batch.productionStage,
+    })
     .from(batch)
     .where(eq(batch.id, parsedBatchId));
   if (!found) return { ok: false, formError: "This Batch no longer exists." };
+
+  // Stored Stages come from the database, not the browser: the rejoin rule needs
+  // to know what really changed.
+  const stored = await db
+    .select({ id: order.id, productionStage: order.productionStage })
+    .from(order)
+    .where(eq(order.batchId, parsedBatchId));
+  const storedStages = new Map(stored.map((o) => [o.id, o.productionStage]));
+  const storedStage = (id: number | null) =>
+    (id === null ? undefined : storedStages.get(id)) ?? null;
+
+  // The Hold back button is hidden on a Delivered Batch; this is the real check.
+  const newHold = orders.some(
+    (o) => o.productionStage !== null && storedStage(o.id) === null,
+  );
+  if (found.productionStage === "delivered" && newHold) {
+    return {
+      ok: false,
+      formError: "This Batch is Delivered, so students can't be held back.",
+    };
+  }
 
   const save = () =>
     db.transaction(async (tx) => {
@@ -141,8 +213,18 @@ export async function saveBatchEntry(
         await tx.delete(order).where(inArray(order.id, removedIds));
       }
 
-      const saved: { id: number; itemIds: number[] }[] = [];
-      for (const { id, items, ...fields } of orders) {
+      const saved: {
+        id: number;
+        itemIds: number[];
+        productionStage: ProductionStage | null;
+      }[] = [];
+      for (const { id, items, productionStage: chosen, ...rest } of orders) {
+        const productionStage = heldStageToSave({
+          saved: storedStage(id),
+          chosen,
+          batchStage: found.productionStage,
+        });
+        const fields = { ...rest, productionStage };
         let orderId: number;
         if (id === null) {
           const [created] = await tx
@@ -169,6 +251,7 @@ export async function saveBatchEntry(
         saved.push({
           id: orderId,
           itemIds: await syncItems(tx, { orderId }, items),
+          productionStage,
         });
       }
 

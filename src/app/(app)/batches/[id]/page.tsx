@@ -99,12 +99,14 @@ export default async function BatchPage({
       <div className="border-t border-border pt-6">
         <BatchEntry
           batchId={b.id}
+          batchStage={b.productionStage}
           stones={options.stones}
           defaultValues={{
             orders: orders.map((o) => ({
               id: o.id,
               customerName: o.customerName,
               customerPhone: o.customerPhone,
+              productionStage: o.productionStage,
               items: ringFirst(itemsByOrder.get(o.id) ?? []),
             })),
             // The item_batch_item_kind CHECK keeps these to pins and other items.
