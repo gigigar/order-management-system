@@ -262,6 +262,8 @@ export const schoolOrderSchema = z.object({
   customerName: name,
   // Optional: Rep lists often have no student phones (no status lookup without one).
   customerPhone: optionalText(30),
+  // Null follows the Batch; set = held back.
+  productionStage: z.enum(PRODUCTION_STAGES).nullable(),
   items: z.tuple([ringItem], itemSchema),
 });
 

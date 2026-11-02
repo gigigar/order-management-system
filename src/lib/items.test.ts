@@ -119,7 +119,22 @@ describe("itemInputFromRow", () => {
 });
 
 describe("schoolOrderSchema", () => {
-  const student = { id: null, customerName: "Ana Cruz", customerPhone: null };
+  const student = {
+    id: null,
+    customerName: "Ana Cruz",
+    customerPhone: null,
+    productionStage: null,
+  };
+
+  it("accepts a student held back at a Stage", () => {
+    expect(
+      schoolOrderSchema.safeParse({
+        ...student,
+        productionStage: "casting",
+        items: [ring],
+      }).success,
+    ).toBe(true);
+  });
 
   it("accepts a student with a ring and an extra dog tag, no phone", () => {
     const dogTag = {
