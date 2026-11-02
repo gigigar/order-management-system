@@ -29,7 +29,10 @@ export function blankItem<K extends ItemKind>(
     unitPrice: null as unknown as number,
   },
 ): Extract<ItemInput, { kind: K }> {
-  return { ...keep, kind } as Extract<ItemInput, { kind: K }>;
+  // Karat and Stone inputs only show for gold and stone rings, so nothing else sets
+  // them, and an error on a hidden input would block the save with no message.
+  const hidden = kind === "ring" ? { karat: null, stoneId: null } : {};
+  return { ...keep, ...hidden, kind } as Extract<ItemInput, { kind: K }>;
 }
 
 // One item's fields, used wherever items are entered: an Individual order, extra
