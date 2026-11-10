@@ -2,7 +2,60 @@ import "server-only";
 import { and, asc, eq, isNull, lte, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { batch, order, school } from "@/db/schema";
+import { openBalances } from "@/lib/balances";
 import { addDays } from "@/lib/dates";
+
+// Totals and Payments per row, as subqueries. Money is centavos.
+const batchOwed = sql<number>`(
+  select coalesce(sum(i.quantity * i.unit_price), 0) from item i
+  where i.batch_id = ${batch.id}
+     or i.order_id in (select o.id from "order" o
+                       where o.batch_id = ${batch.id} and o.cancelled_at is null)
+)::int`;
+const batchPaid = sql<number>`(
+  select coalesce(sum(p.amount), 0) from payment p where p.batch_id = ${batch.id}
+)::int`;
+// The table name is written out because Drizzle drops it from ${order.id} when a query
+// has no joins, and a bare "id" here would mean the subquery's own i.id or p.id.
+const orderOwed = sql<number>`(
+  select coalesce(sum(i.quantity * i.unit_price), 0) from item i
+  where i.order_id = "order"."id"
+)::int`;
+const orderPaid = sql<number>`(
+  select coalesce(sum(p.amount), 0) from payment p where p.order_id = "order"."id"
+)::int`;
+
+// Every signed Batch and Individual order that isn't cancelled or fully paid. Delivered
+// entries count: that money is still owed. The Dashboard's Balance to collect is this
+// list's total, so the two always match.
+export async function loadOpenBalances() {
+  const [batches, orders] = await Promise.all([
+    db
+      .select({
+        id: batch.id,
+        name: school.name,
+        dueDate: batch.dueDate,
+        owed: batchOwed,
+        paid: batchPaid,
+      })
+      .from(batch)
+      .innerJoin(school, eq(batch.schoolId, school.id))
+      .where(
+        and(isNull(batch.cancelledAt), eq(batch.dealStage, "agreement_signed")),
+      ),
+    db
+      .select({
+        id: order.id,
+        name: order.customerName,
+        dueDate: order.dueDate,
+        owed: orderOwed,
+        paid: orderPaid,
+      })
+      .from(order)
+      .where(and(isNull(order.batchId), isNull(order.cancelledAt))),
+  ]);
+  return openBalances(batches, orders);
+}
 
 // Overdue and due-soon work: signed Batches and Individual orders, not Delivered,
 // not cancelled, due on or before `today + 7`. Both queries match the partial
@@ -10,24 +63,6 @@ import { addDays } from "@/lib/dates";
 // Postgres reads only open work, in due-date order.
 export async function loadDueWork(today: string) {
   const cutoff = addDays(today, 7);
-
-  // Totals and Payments per row, as subqueries. Money is centavos.
-  const batchOwed = sql<number>`(
-    select coalesce(sum(i.quantity * i.unit_price), 0) from item i
-    where i.batch_id = ${batch.id}
-       or i.order_id in (select o.id from "order" o
-                         where o.batch_id = ${batch.id} and o.cancelled_at is null)
-  )::int`;
-  const batchPaid = sql<number>`(
-    select coalesce(sum(p.amount), 0) from payment p where p.batch_id = ${batch.id}
-  )::int`;
-  const orderOwed = sql<number>`(
-    select coalesce(sum(i.quantity * i.unit_price), 0) from item i
-    where i.order_id = ${order.id}
-  )::int`;
-  const orderPaid = sql<number>`(
-    select coalesce(sum(p.amount), 0) from payment p where p.order_id = ${order.id}
-  )::int`;
 
   const [batches, orders] = await Promise.all([
     db

@@ -9,6 +9,7 @@ const dailyLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/batches", label: "Batch orders", icon: "batches" },
   { href: "/orders", label: "Individual orders", icon: "orders" },
+  { href: "/payments", label: "Payments", icon: "payments" },
 ];
 const setupLinks: NavLink[] = [
   { href: "/areas", label: "Areas" },

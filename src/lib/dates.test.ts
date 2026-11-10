@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, dueStatus, formatDay, todayInManila } from "./dates";
+import {
+  daysBetween,
+  dueStatus,
+  formatDay,
+  isMonth,
+  todayInManila,
+} from "./dates";
+
+describe("isMonth", () => {
+  it("accepts only a real year and month", () => {
+    expect(isMonth("2026-11")).toBe(true);
+    expect(isMonth("2026-13")).toBe(false);
+    expect(isMonth("2026-1")).toBe(false);
+    expect(isMonth(["2026-11"])).toBe(false);
+    expect(isMonth(null)).toBe(false);
+  });
+});
 
 describe("todayInManila", () => {
   it("is already tomorrow in Manila when it's evening in UTC", () => {

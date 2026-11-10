@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Table2, UserRound } from "lucide-react";
+import { LayoutDashboard, ReceiptText, Table2, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useConfirmLeave } from "./unsaved-changes";
@@ -10,6 +10,7 @@ const icons = {
   dashboard: LayoutDashboard,
   batches: Table2,
   orders: UserRound,
+  payments: ReceiptText,
 };
 
 export type NavLink = {

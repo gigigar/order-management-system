@@ -2,6 +2,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import type { ProductionStage } from "@/lib/enums";
+import { loadOpenBalances } from "./load";
 
 // The business numbers at the top of the Dashboard. One round trip each; all money
 // is centavos. A School order's Stage is its own when held back, else its Batch's.
@@ -31,27 +32,7 @@ export async function loadBusinessStats(today: string) {
       select ${stage} as stage, sum(i.quantity)::int as rings
       ${liveRings} and ${stage} <> 'delivered'
       group by 1`),
-    // Unpaid amount of each open Batch and Individual order, never below 0 (overpaid rows).
-    db.execute<{ total: number }>(sql`
-      select coalesce(sum(greatest(owed - paid, 0)), 0)::int as total from (
-        select
-          (select coalesce(sum(i.quantity * i.unit_price), 0) from item i
-            where i.batch_id = b.id
-               or i.order_id in (select o.id from "order" o
-                                 where o.batch_id = b.id and o.cancelled_at is null)) as owed,
-          (select coalesce(sum(p.amount), 0) from payment p where p.batch_id = b.id) as paid
-        from batch b
-        where b.production_stage <> 'delivered' and b.cancelled_at is null
-          and b.deal_stage = 'agreement_signed'
-        union all
-        select
-          (select coalesce(sum(i.quantity * i.unit_price), 0) from item i
-            where i.order_id = o.id),
-          (select coalesce(sum(p.amount), 0) from payment p where p.order_id = o.id)
-        from "order" o
-        where o.batch_id is null and o.production_stage <> 'delivered'
-          and o.cancelled_at is null
-      ) open_work`),
+    loadOpenBalances(),
     db.execute<{ total: number }>(sql`
       select coalesce(sum(amount), 0)::int as total from payment
       where paid_on >= ${monthStart}::date`),
@@ -61,7 +42,7 @@ export async function loadBusinessStats(today: string) {
     ringsThisYear: totals.rows[0].this_year,
     ringsInProduction: totals.rows[0].in_production,
     ringsByStage: new Map(byStage.rows.map((r) => [r.stage, r.rings])),
-    balanceToCollect: balance.rows[0].total,
+    balanceToCollect: balance.total,
     collectedThisMonth: collected.rows[0].total,
   };
 }
