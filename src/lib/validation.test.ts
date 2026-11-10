@@ -4,6 +4,7 @@ import {
   batchSchema,
   designSchema,
   inviteSchema,
+  paymentSchema,
   rowId,
   schoolSchema,
 } from "./validation";
@@ -150,5 +151,39 @@ describe("batchSchema", () => {
     expect(messages({ ...early, dueDate: "2026-02-30" })).toEqual([
       ["dueDate", "Enter a valid date"],
     ]);
+  });
+});
+
+describe("paymentSchema receipt number", () => {
+  const payment = {
+    amount: 500,
+    method: "cash",
+    collectedByAgentId: null,
+    receiptNo: "A-123",
+    paidOn: "2026-11-10",
+  };
+
+  it("trims the receipt number", () => {
+    expect(
+      paymentSchema.parse({ ...payment, receiptNo: "  A-123  " }).receiptNo,
+    ).toBe("A-123");
+  });
+
+  it.each([
+    ["empty", ""],
+    ["only spaces", "   "],
+    ["missing", undefined],
+  ])("rejects a receipt number that is %s", (_label, receiptNo) => {
+    const result = paymentSchema.safeParse({ ...payment, receiptNo });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe("Required");
+  });
+
+  it("rejects receipt numbers over 50 characters", () => {
+    const result = paymentSchema.safeParse({
+      ...payment,
+      receiptNo: "a".repeat(51),
+    });
+    expect(result.success).toBe(false);
   });
 });

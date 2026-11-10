@@ -10,7 +10,7 @@ import {
 } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
 import { PAYMENT_METHODS, paymentMethodLabels } from "@/lib/enums";
-import { emptyToNull, emptyToNullNumber } from "@/lib/form-values";
+import { emptyToNullNumber } from "@/lib/form-values";
 import { paymentSchema, type PaymentInput } from "@/lib/validation";
 import { savePayment, type PaymentParent } from "./actions";
 
@@ -90,9 +90,9 @@ export function PaymentForm({
         ))}
       </SelectField>
       <TextField
-        label="Receipt no. (optional)"
+        label="Receipt no."
         error={errors.receiptNo?.message}
-        {...register("receiptNo", { setValueAs: emptyToNull })}
+        {...register("receiptNo")}
       />
       <div className="flex flex-col gap-2 sm:col-span-3">
         <FormError message={errors.root?.message} />

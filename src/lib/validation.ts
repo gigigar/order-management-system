@@ -281,7 +281,7 @@ export const paymentSchema = z.object({
   method: z.enum(PAYMENT_METHODS),
   // Null = paid straight to the Main office.
   collectedByAgentId: optionalId,
-  receiptNo: optionalText(50),
+  receiptNo: requiredText(50),
   paidOn: z.iso.date("Enter the date paid"),
 });
 

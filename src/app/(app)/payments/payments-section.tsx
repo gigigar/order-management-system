@@ -60,7 +60,7 @@ export function PaymentsSection({
     amount: NaN, // an empty number box
     method: "cash",
     collectedByAgentId: null,
-    receiptNo: null,
+    receiptNo: "",
     paidOn: todayInManila(),
   };
 
@@ -110,9 +110,7 @@ export function PaymentsSection({
                   <TableCell className="px-4 py-3.5">
                     {agentName ?? "Main office"}
                   </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    {p.receiptNo ?? "—"}
-                  </TableCell>
+                  <TableCell className="px-4 py-3.5">{p.receiptNo}</TableCell>
                   <TableCell className="flex gap-3 px-4 py-3.5">
                     <button
                       type="button"

@@ -1,0 +1,1 @@
+ALTER TABLE "payment" ALTER COLUMN "receipt_no" SET NOT NULL;
