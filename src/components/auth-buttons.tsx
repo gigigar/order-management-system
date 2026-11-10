@@ -1,13 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export function SignInButton() {
   return (
-    <button
+    <Button
       type="button"
-      className="rounded border px-4 py-2"
+      size="lg"
+      className="w-full"
       onClick={() =>
         authClient.signIn.social({
           provider: "google",
@@ -17,7 +19,7 @@ export function SignInButton() {
       }
     >
       Sign in with Google
-    </button>
+    </Button>
   );
 }
 

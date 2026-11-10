@@ -1,7 +1,7 @@
 import { useId, type ComponentProps } from "react";
 
 // Native inputs with a label and an error message wired up for screen readers.
-// React Hook Form's register() spreads name, ref and handlers straight onto them.
+// React Hook Form's register() spreads name, ref, and handlers straight onto them.
 
 type FieldProps = { label: string; error?: string };
 
@@ -12,7 +12,7 @@ function Field({
   children,
 }: FieldProps & { id: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>
@@ -91,6 +91,30 @@ export function FormError({ message }: { message?: string }) {
     <p role="alert" className="text-sm text-red-700">
       {message}
     </p>
+  );
+}
+
+// One section of a form: its title on the left, its fields in a grid on the right.
+export function FormRow({
+  title,
+  columns = "sm:grid-cols-2",
+  children,
+}: {
+  title: string;
+  columns?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={title}
+      className="grid gap-3 border-t py-5 first:border-t-0 lg:grid-cols-[8rem_minmax(0,1fr)] lg:gap-6"
+    >
+      <h3 className="font-semibold">{title}</h3>
+      <div className={`grid min-w-0 items-start gap-3 ${columns}`}>
+        {children}
+      </div>
+    </div>
   );
 }
 

@@ -4,13 +4,19 @@ import { db } from "@/db";
 import { area, agent } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { AgentForm } from "./agent-form";
+import { FormAndList } from "@/components/form-and-list";
 import { PageHeader } from "@/components/page-header";
 
 export default async function AgentsPage() {
   await requireUser();
   const [rows, areas] = await Promise.all([
     db
-      .select({ id: agent.id, name: agent.name, areaName: area.name })
+      .select({
+        id: agent.id,
+        name: agent.name,
+        phone: agent.phone,
+        areaName: area.name,
+      })
       .from(agent)
       .innerJoin(area, eq(agent.areaId, area.id))
       .orderBy(asc(agent.name)),
@@ -26,34 +32,46 @@ export default async function AgentsPage() {
         title="Agents"
         description="Agents and the Area each one covers."
       />
-      {areas.length === 0 ? (
-        <p>
-          Add an{" "}
-          <Link href="/areas" className="underline">
-            Area
-          </Link>{" "}
-          first.
-        </p>
-      ) : (
-        <AgentForm areas={areas} />
-      )}
-      {rows.length === 0 ? (
-        <p>No Agents yet.</p>
-      ) : (
-        <ul className="divide-y rounded-xl border bg-card">
-          {rows.map((row) => (
-            <li key={row.id} className="flex justify-between gap-3 p-3">
-              <span>
-                {row.name}{" "}
-                <span className="text-muted-foreground">· {row.areaName}</span>
-              </span>
-              <Link href={`/agents/${row.id}`} className="underline">
-                Edit <span className="sr-only">{row.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <FormAndList
+        form={
+          areas.length === 0 ? (
+            <p>
+              Add an{" "}
+              <Link href="/areas" className="underline">
+                Area
+              </Link>{" "}
+              first.
+            </p>
+          ) : (
+            <AgentForm areas={areas} />
+          )
+        }
+      >
+        {rows.length === 0 ? (
+          <p>No Agents yet.</p>
+        ) : (
+          <ul className="divide-y rounded-xl border bg-card">
+            {rows.map((row) => (
+              <li key={row.id} className="flex justify-between gap-3 p-3">
+                <span>
+                  {row.name}{" "}
+                  <span className="text-muted-foreground">
+                    · {row.areaName}
+                  </span>
+                  {row.phone && (
+                    <span className="block text-sm text-muted-foreground">
+                      {row.phone}
+                    </span>
+                  )}
+                </span>
+                <Link href={`/agents/${row.id}`} className="underline">
+                  Edit <span className="sr-only">{row.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </FormAndList>
     </div>
   );
 }

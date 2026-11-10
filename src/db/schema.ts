@@ -37,7 +37,7 @@ const timestamps = {
     .$onUpdate(() => new Date()),
 };
 
-// Who created and last changed a Batch, Order or Payment. Users are never deleted while referenced.
+// Who created and last changed a Batch, Order, or Payment. Users are never deleted while referenced.
 const audit = {
   createdBy: text()
     .notNull()
@@ -64,12 +64,15 @@ export const invite = pgTable(
 export const area = pgTable("area", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull().unique(),
+  // Optional: not every Area has a branch.
+  address: text(),
   ...timestamps,
 });
 
 export const agent = pgTable("agent", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
+  phone: text(),
   // The Agent's sign-in account, once they have one.
   userId: text()
     .unique("agent_user_id_unique")
@@ -88,6 +91,10 @@ export const school = pgTable(
     areaId: integer()
       .notNull()
       .references(() => area.id, { onDelete: "restrict" }),
+    address: text(),
+    // Prefills a new Batch's Rep; each Batch keeps its own copy.
+    repName: text(),
+    repPhone: text(),
     ...timestamps,
   },
   // Two cities can each have a "St. Mary's", but one Area can't list it twice.

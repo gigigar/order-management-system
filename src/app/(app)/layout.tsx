@@ -1,4 +1,5 @@
 import { SignOutButton } from "@/components/auth-buttons";
+import { Brand } from "@/components/brand";
 import { NavLinks, type NavLink } from "@/components/nav-links";
 import { UnsavedChangesProvider } from "@/components/unsaved-changes";
 import { requireUser } from "@/lib/session";
@@ -59,19 +60,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <SignOutButton />
     </div>
   );
-  const logo = (
-    <div className="flex items-center gap-2.5 px-2">
-      <span
-        aria-hidden="true"
-        className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary font-bold text-sidebar-primary-foreground"
-      >
-        O
-      </span>
-      <span className="text-[15px] font-semibold text-white">
-        Order tracker
-      </span>
-    </div>
-  );
+  const logo = <Brand variant="sidebar" />;
 
   return (
     <UnsavedChangesProvider>

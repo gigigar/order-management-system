@@ -44,7 +44,7 @@ type Stone = { id: number; name: string };
 type Ring = Extract<ItemInput, { kind: "ring" }>;
 
 // A new student row. It copies the ring spec from the row above (most of a Batch
-// orders the same ring); name, phone, size and engraving start blank.
+// orders the same ring); name, phone, size, and engraving start blank.
 function newStudent(above?: Ring): SchoolOrderInput {
   const ring = {
     id: null,

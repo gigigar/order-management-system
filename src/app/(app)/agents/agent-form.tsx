@@ -10,6 +10,7 @@ import {
   TextField,
 } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
+import { emptyToNull } from "@/lib/form-values";
 import { agentSchema, type AgentInput } from "@/lib/validation";
 import { saveAgent } from "./actions";
 
@@ -31,7 +32,7 @@ export function AgentForm({
     formState: { errors, isSubmitting },
   } = useForm<AgentInput>({
     resolver: zodResolver(agentSchema),
-    defaultValues,
+    defaultValues: defaultValues ?? { phone: null },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -51,6 +52,12 @@ export function AgentForm({
         label="Name"
         error={errors.name?.message}
         {...register("name")}
+      />
+      <TextField
+        label="Contact number (optional)"
+        type="tel"
+        error={errors.phone?.message}
+        {...register("phone", { setValueAs: emptyToNull })}
       />
       <SelectField
         label="Area"

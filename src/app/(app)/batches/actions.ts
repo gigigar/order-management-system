@@ -2,8 +2,10 @@
 
 import { and, eq, inArray, isNull, ne, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
+import { deleteUnpaidBatch } from "@/db/record-removal";
 import {
   StaleRowError,
   syncItems,
@@ -15,7 +17,7 @@ import { creditsFrom } from "@/lib/agent-credits";
 import type { ProductionStage } from "@/lib/enums";
 import { heldStageToSave } from "@/lib/hold-back";
 import { generateOrderCode } from "@/lib/order-code";
-import { requireUser } from "@/lib/session";
+import { requireAdmin, requireUser } from "@/lib/session";
 import {
   batchEntrySchema,
   batchSchema,
@@ -281,4 +283,37 @@ export async function saveBatchEntry(
     }
     throw error;
   }
+}
+
+// Cancelling keeps the Batch and its Payments on record; reports skip it.
+export async function setBatchCancelled(
+  id: number,
+  cancelled: boolean,
+): Promise<void> {
+  const user = await requireUser();
+  const batchId = rowId.unwrap().parse(id);
+  await db
+    .update(batch)
+    .set({ cancelledAt: cancelled ? new Date() : null, updatedBy: user.id })
+    .where(eq(batch.id, batchId));
+  revalidatePath("/batches");
+  revalidatePath(`/batches/${batchId}`);
+  revalidatePath("/dashboard");
+}
+
+// For Batches entered by mistake. Owners only, and never once a Payment exists.
+export async function deleteBatch(
+  id: number,
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+  const deleted = await deleteUnpaidBatch(rowId.unwrap().parse(id));
+  if (!deleted) {
+    return {
+      error:
+        "This Batch has payments, so it can't be deleted. Cancel it instead.",
+    };
+  }
+  revalidatePath("/batches");
+  revalidatePath("/dashboard");
+  redirect("/batches");
 }

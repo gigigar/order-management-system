@@ -4,13 +4,13 @@
 
 **Status: building v1.** The internal tracker goes live with the owners on Sat Nov 7, 2026.
 
-An order management system for a small business that makes custom college rings, pins and dog tags. Sales Agents in different areas each track orders and payments in their own paper notebook. This replaces the notebooks with one shared record of Batches and Orders that shows what's overdue or due soon and **what each Agent still owes the main office**, without anyone having to notice money is missing. A public page will let customers check their order's status.
+An order management system for a small business that makes custom college rings, pins, and dog tags. Sales Agents in different areas each track orders and payments in their own paper notebook. This replaces the notebooks with one shared record of Batches and Orders that shows what's overdue or due soon and **what each Agent still owes the main office**, without anyone having to notice money is missing. A public page will let customers check their order's status.
 
 ## What's built
 
 - **Sign-in and roles:** Google sign-in, an admin-managed invite list, and role checks on the server
-- **Reference data:** Areas, Schools, Agents, Designs and Stones
-- **Batches and Individual orders**, with rings, pins, dog tags and other items on each Order
+- **Reference data:** Areas, Schools, Agents, Designs, and Stones
+- **Batches and Individual orders**, with rings, pins, dog tags, and other items on each Order
 - **Batch entry table:** a whole class's orders saved in one database transaction, with stale-row detection and order-code retry
 - **Payments** on Batches and Individual orders
 - **Dashboard:** a business overview (rings by stage, money collected, balances owed) plus overdue and due-soon lists
@@ -31,19 +31,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS + shadcn/ui ·
 
 ## Testing and CI
 
-- **75 Vitest unit tests** on the domain logic: order codes, items, money, payments, Agent credits, validation and the Dashboard's due dates
+- **75 Vitest unit tests** on the domain logic: order codes, items, money, payments, Agent credits, validation, and the Dashboard's due dates
 - **Every PR runs:** lint, format check, typecheck, tests, all migrations against a real PostgreSQL service, and a production build. `main` only accepts PRs with green CI, squash-merged
 
 ## Design highlights
 
 - **One Next.js app, no separate API.** Server Components read data and forms call Server Actions. The only public endpoint is the status lookup.
 - **Money is stored as integer centavos**, never floats.
-- **Amount owed is computed by query, never stored**, so it can't drift from the Payments, Commissions and Remittances behind it.
+- **Amount owed is computed by query, never stored**, so it can't drift from the Payments, Commissions, and Remittances behind it.
 
 ## Docs
 
 - [`CONTEXT.md`](CONTEXT.md): the domain glossary (Order, Batch, Stage, Status…)
-- [`docs/design.md`](docs/design.md): requirements, architecture and data model
+- [`docs/design.md`](docs/design.md): requirements, architecture, and data model
 - [`docs/adr/`](docs/adr/): architecture decisions
 
 ## Run it locally
@@ -60,6 +60,6 @@ pnpm dev
 
 ## Data
 
-This repo only ever contains made-up sample data. Real customers, prices and suppliers live only in the production database.
+This repo only ever contains made-up sample data. Real customers, prices, and suppliers live only in the production database.
 
 Source shared for portfolio review.

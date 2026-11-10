@@ -54,7 +54,7 @@ describe("dueSections", () => {
 });
 
 describe("dueLabel", () => {
-  it("says late, today or in N days", () => {
+  it("says late, today, or in N days", () => {
     expect(dueLabel(-3)).toBe("3 days late");
     expect(dueLabel(-1)).toBe("1 day late");
     expect(dueLabel(0)).toBe("Due today");

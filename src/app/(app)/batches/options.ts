@@ -6,7 +6,13 @@ import { agent, area, design, school, stone } from "@/db/schema";
 export async function batchFormOptions() {
   const [schools, designs, agents, stones] = await Promise.all([
     db
-      .select({ id: school.id, name: school.name, areaName: area.name })
+      .select({
+        id: school.id,
+        name: school.name,
+        areaName: area.name,
+        repName: school.repName,
+        repPhone: school.repPhone,
+      })
       .from(school)
       .innerJoin(area, eq(school.areaId, area.id))
       .orderBy(asc(school.name), asc(area.name)),

@@ -7,7 +7,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Order Management System",
-  description: "Orders for college rings, pins and dog tags.",
+  description: "Orders for college rings, pins, and dog tags.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -13,6 +13,7 @@ import { requireUser } from "@/lib/session";
 import { schoolSchema, rowId, type SchoolInput } from "@/lib/validation";
 
 // Same pattern as saveArea: re-check the session and the input on the server.
+// The Rep here is only a starting point: each Batch keeps its own copy.
 export async function saveSchool(
   id: number | null,
   input: SchoolInput,

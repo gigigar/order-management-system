@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { stone } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { StoneForm } from "./stone-form";
+import { FormAndList } from "@/components/form-and-list";
 import { PageHeader } from "@/components/page-header";
 
 export default async function StonesPage() {
@@ -16,21 +17,22 @@ export default async function StonesPage() {
         title="Stones"
         description="Gems a Customer can choose for a ring's Face."
       />
-      <StoneForm />
-      {stones.length === 0 ? (
-        <p>No Stones yet.</p>
-      ) : (
-        <ul className="divide-y rounded-xl border bg-card">
-          {stones.map((a) => (
-            <li key={a.id} className="flex justify-between p-3">
-              <span>{a.name}</span>
-              <Link href={`/stones/${a.id}`} className="underline">
-                Edit <span className="sr-only">{a.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <FormAndList form={<StoneForm />}>
+        {stones.length === 0 ? (
+          <p>No Stones yet.</p>
+        ) : (
+          <ul className="divide-y rounded-xl border bg-card">
+            {stones.map((a) => (
+              <li key={a.id} className="flex justify-between p-3">
+                <span>{a.name}</span>
+                <Link href={`/stones/${a.id}`} className="underline">
+                  Edit <span className="sr-only">{a.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </FormAndList>
     </div>
   );
 }

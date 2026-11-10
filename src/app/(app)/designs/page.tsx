@@ -5,6 +5,7 @@ import { design, school } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { DesignForm } from "./design-form";
 import { schoolOptions } from "./schools";
+import { FormAndList } from "@/components/form-and-list";
 import { PageHeader } from "@/components/page-header";
 
 export default async function DesignsPage() {
@@ -26,40 +27,45 @@ export default async function DesignsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Designs" description="Each School's ring designs." />
-      {schools.length === 0 ? (
-        <p>
-          Add a{" "}
-          <Link href="/schools" className="underline">
-            School
-          </Link>{" "}
-          first.
-        </p>
-      ) : (
-        <DesignForm schools={schools} />
-      )}
-      {rows.length === 0 ? (
-        <p>No Designs yet.</p>
-      ) : (
-        <ul className="divide-y rounded-xl border bg-card">
-          {rows.map((row) => (
-            <li key={row.id} className="flex justify-between gap-3 p-3">
-              <span>
-                {row.schoolName}
-                {row.year !== null && ` · ${row.year}`}
-                <span className="block text-sm text-muted-foreground">
-                  {row.description}
+      <FormAndList
+        form={
+          schools.length === 0 ? (
+            <p>
+              Add a{" "}
+              <Link href="/schools" className="underline">
+                School
+              </Link>{" "}
+              first.
+            </p>
+          ) : (
+            <DesignForm schools={schools} />
+          )
+        }
+      >
+        {rows.length === 0 ? (
+          <p>No Designs yet.</p>
+        ) : (
+          <ul className="divide-y rounded-xl border bg-card">
+            {rows.map((row) => (
+              <li key={row.id} className="flex justify-between gap-3 p-3">
+                <span>
+                  {row.schoolName}
+                  {row.year !== null && ` · ${row.year}`}
+                  <span className="block text-sm text-muted-foreground">
+                    {row.description}
+                  </span>
                 </span>
-              </span>
-              <Link href={`/designs/${row.id}`} className="underline">
-                Edit{" "}
-                <span className="sr-only">
-                  {row.schoolName} {row.year}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+                <Link href={`/designs/${row.id}`} className="underline">
+                  Edit{" "}
+                  <span className="sr-only">
+                    {row.schoolName} {row.year}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </FormAndList>
     </div>
   );
 }

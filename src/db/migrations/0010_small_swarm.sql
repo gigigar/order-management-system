@@ -1,0 +1,1 @@
+ALTER TABLE "area" ADD COLUMN "address" text;

@@ -11,31 +11,54 @@ import {
 
 describe("areaSchema", () => {
   it("trims the name", () => {
-    expect(areaSchema.parse({ name: "  Cebu  " })).toEqual({ name: "Cebu" });
+    expect(areaSchema.parse({ name: "  Cebu  ", address: null })).toEqual({
+      name: "Cebu",
+      address: null,
+    });
+  });
+
+  it("accepts a branch address, trimmed", () => {
+    expect(
+      areaSchema.parse({ name: "Cebu", address: "  12 Osmeña Blvd  " }).address,
+    ).toBe("12 Osmeña Blvd");
+  });
+
+  it("rejects a branch address over 300 characters", () => {
+    const address = "a".repeat(301);
+    expect(areaSchema.safeParse({ name: "Cebu", address }).success).toBe(false);
   });
 
   it("rejects a name that is only spaces", () => {
-    const result = areaSchema.safeParse({ name: "   " });
+    const result = areaSchema.safeParse({ name: "   ", address: null });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].message).toBe("Required");
   });
 
   it("rejects names over 100 characters", () => {
-    expect(areaSchema.safeParse({ name: "a".repeat(101) }).success).toBe(false);
+    expect(
+      areaSchema.safeParse({ name: "a".repeat(101), address: null }).success,
+    ).toBe(false);
   });
 });
 
 describe("schoolSchema", () => {
+  const school = {
+    name: "St. Mary's",
+    address: null,
+    repName: "Ana Cruz",
+    repPhone: null,
+  };
+
   it("accepts a name and an Area", () => {
-    expect(schoolSchema.parse({ name: "St. Mary's", areaId: 3 })).toEqual({
-      name: "St. Mary's",
+    expect(schoolSchema.parse({ ...school, areaId: 3 })).toEqual({
+      ...school,
       areaId: 3,
     });
   });
 
   // An unchosen <select> with valueAsNumber gives NaN.
   it("asks for an Area when none is chosen", () => {
-    const result = schoolSchema.safeParse({ name: "St. Mary's", areaId: NaN });
+    const result = schoolSchema.safeParse({ ...school, areaId: NaN });
     expect(result.error?.issues[0].message).toBe("Choose an Area");
   });
 });
@@ -176,7 +199,7 @@ describe("paymentSchema receipt number", () => {
   ])("rejects a receipt number that is %s", (_label, receiptNo) => {
     const result = paymentSchema.safeParse({ ...payment, receiptNo });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe("Required");
+    expect(result.error?.issues[0].message).toBe("Enter the receipt number");
   });
 
   it("rejects receipt numbers over 50 characters", () => {

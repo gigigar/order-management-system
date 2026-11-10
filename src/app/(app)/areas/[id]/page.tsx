@@ -19,7 +19,10 @@ export default async function EditAreaPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Edit Area" />
-      <AreaForm id={found.id} defaultValues={{ name: found.name }} />
+      <AreaForm
+        id={found.id}
+        defaultValues={{ name: found.name, address: found.address }}
+      />
     </div>
   );
 }
