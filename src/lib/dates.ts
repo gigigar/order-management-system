@@ -14,6 +14,10 @@ export function addDays(day: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+export function isMonth(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+}
+
 export type DueStatus = "overdue" | "due_soon" | null;
 
 // CONTEXT.md: Overdue = past its Due date and not Delivered. Due soon = within the

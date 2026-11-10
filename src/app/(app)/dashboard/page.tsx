@@ -32,12 +32,16 @@ export default async function DashboardPage() {
       value: stats.ringsThisYear,
     },
     { label: "Rings in production", value: stats.ringsInProduction },
-    { label: "Balance to collect", value: formatPesos(stats.balanceToCollect) },
+    {
+      label: "Balance to collect",
+      value: formatPesos(stats.balanceToCollect),
+      href: "/balances",
+    },
     {
       label: "Collected this month",
       value: formatPesos(stats.collectedThisMonth),
     },
-  ];
+  ] as { label: string; value: string | number; href?: string }[];
   // Delivered isn't work in progress.
   const stages = PRODUCTION_STAGES.filter((s) => s !== "delivered").map(
     (stage) => ({
@@ -62,6 +66,13 @@ export default async function DashboardPage() {
             <dd className="text-2xl font-semibold tabular-nums">
               {card.value}
             </dd>
+            {card.href && (
+              <dd>
+                <Link href={card.href} className="text-sm underline">
+                  See who owes this
+                </Link>
+              </dd>
+            )}
           </div>
         ))}
       </dl>
