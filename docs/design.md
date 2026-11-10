@@ -54,9 +54,9 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 | `item`                       | `order_id` **or** `batch_id` (Batch item), `kind` (`ring` \| `dog_tag` \| `pin` \| `other`), `quantity`, `unit_price` (the selling price); ring: `ring_type`, `material`, `karat`, `size`, `face` (`stone` \| `logo`), `stone_id` (set exactly when Face is stone), `engraving` (optional); dog tag: `birthday`, `blood_type`; other: `description` |
 | `agent_credit`               | `batch_id` **or** `order_id`, `agent_id`, `share_percent`: at most 2 per Batch or Individual order; shares add up to 100                                                                                                                                                                                                                            |
 | `payment`                    | `batch_id` **or** `order_id`, `amount`, `method` (cash \| gcash \| bank \| check), `collected_by_agent_id`, `receipt_no`, `paid_on`                                                                                                                                                                                                                 |
-| `commission_rule` (Oct 31)   | `item_kind`, `material`, `type` (`percent` \| `flat` \| `markup`), `value`, `effective_from`                                                                                                                                                                                                                                                        |
-| `commission` (Oct 31)        | `item_id`, `agent_id`, `amount`, `rule_snapshot`, `earned_on`                                                                                                                                                                                                                                                                                       |
-| `remittance` (Oct 31)        | `agent_id`, `amount`, `method`, `reference`, `sent_on`, `confirmed_by`, `confirmed_on`                                                                                                                                                                                                                                                              |
+| `commission_rule` (Nov 21)   | `item_kind`, `material`, `type` (`percent` \| `flat` \| `markup`), `value`, `effective_from`                                                                                                                                                                                                                                                        |
+| `commission` (Nov 21)        | `item_id`, `agent_id`, `amount`, `rule_snapshot`, `earned_on`                                                                                                                                                                                                                                                                                       |
+| `remittance` (Nov 21)        | `agent_id`, `amount`, `method`, `reference`, `sent_on`, `confirmed_by`, `confirmed_on`                                                                                                                                                                                                                                                              |
 
 - **"Exactly one parent" columns** (`order_id` or `batch_id`) are enforced with a `CHECK` constraint. Rules that span tables or rows (Payments and Agent credits for a School order go on its Batch; at most 2 Agent credits adding up to 100) are enforced in Server Actions, with unit tests.
 - **A Batch can be saved half-filled during the deal;** once `agreement_signed`, a `CHECK` requires its Design, Rep and Due date.
@@ -72,7 +72,7 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 - **Every Server Action checks the session and role on the server**, and validates input with Zod. Secrets live only in Vercel and local `.env` (git-ignored); `.env.example` lists the names.
 - **Sensitive data:** birthday and blood type are collected only for dog tags, never shown on the public page, and covered by a short privacy notice on the order form (Philippine Data Privacy Act).
 - **Public status lookup:** order code + last 4 digits of the Customer's phone, rate-limited, shows only Status and Due date.
-- **Checked against the OWASP Top 10** before Oct 31.
+- **Checked against the OWASP Top 10** before Sat Dec 12.
 
 ## Testing and CI
 
@@ -90,7 +90,7 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 ## Open questions
 
 - Commission on Other items (medals, plaques): not decided by the owners yet.
-- Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Oct 17 (ADR either way). At the same time, store the Neon database URLs as Vercel Secrets (rotating the Neon password if needed), before anyone else gets access.
+- Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Wed Nov 11 (ADR either way). At the same time, store the Neon database URLs as Vercel Secrets (rotating the Neon password if needed), before anyone else gets access.
 - Google sign-in is in Testing mode (test users only, an "unverified app" warning). Publishing needs a `/privacy` page (also the dog-tag privacy notice) and the final domain. Do it by Fri Nov 13.
 - Neon preview branches copy production, so once real Orders exist, previews hold real customer data. Before Sat Nov 14, branch previews from a seeded fake-data branch instead.
 - Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Sat Dec 12.
