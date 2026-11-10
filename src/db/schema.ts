@@ -101,7 +101,7 @@ export const school = pgTable(
   (t) => [unique("school_area_id_name_unique").on(t.areaId, t.name)],
 );
 
-// Stones offered for rings, managed in Setup (the list changes with the supplier).
+// Stones offered for rings, managed in Manage (the list changes with the supplier).
 export const stone = pgTable("stone", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull().unique(),

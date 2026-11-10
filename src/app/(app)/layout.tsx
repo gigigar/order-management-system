@@ -4,7 +4,7 @@ import { NavLinks, type NavLink } from "@/components/nav-links";
 import { UnsavedChangesProvider } from "@/components/unsaved-changes";
 import { requireUser } from "@/lib/session";
 
-// Daily pages first. Setup is reference data the owners touch a few times a year.
+// Daily pages first. Manage is reference data the owners touch a few times a year.
 const dailyLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/batches", label: "Batch orders", icon: "batches" },
@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <NavLinks links={dailyLinks} />
       <div className="flex flex-col gap-1">
         <h2 className="px-3 text-xs font-medium tracking-wider text-[#b9a894] uppercase">
-          Setup
+          Manage
         </h2>
         <NavLinks links={setup} />
       </div>

@@ -1,4 +1,4 @@
-// Setup pages: the add form on the left and the list on the right. Stacks on narrow screens.
+// Manage pages: the add form on the left and the list on the right. Stacks on narrow screens.
 export function FormAndList({
   form,
   children,
