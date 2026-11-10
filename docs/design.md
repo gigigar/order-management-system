@@ -17,11 +17,9 @@ Replace the Agents' separate notebooks with one shared record of Batches and Ord
 
 | Milestone                   | Scope                                                                                                                                                                                                                                                                                                                                           |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sat Oct 17: tracker**     | Google sign-in (invite list), roles; Areas, Agents, Schools, Designs; Batches with Batch entry table; School and Individual orders; ring, dog tag, pin (Batch item) and Other items; prices saved per item; Payments with the Balance shown; Deal and Production stages with per-Order hold-back; overdue / due-soon dashboard; works on phones |
-| **Sat Oct 31: money**       | Commission rules (admin), Commission earned on Delivered, Remittances with Owner confirmation, Amount owed per Agent with days since delivery                                                                                                                                                                                                   |
-| **Sat Nov 14: public site** | Homepage, sample gallery, public status lookup (rate-limited); `ARCHITECTURE.md`                                                                                                                                                                                                                                                                |
-
-**Oct 10 checkpoint:** if Orders and Payments aren't working, cut in order: Other items → Designs (become a text field) → dog tag details.
+| **Sat Nov 14: tracker**     | Google sign-in (invite list), roles; Areas, Agents, Schools, Designs; Batches with Batch entry table; School and Individual orders; ring, dog tag, pin (Batch item) and Other items; prices saved per item; Payments with the Balance shown; Deal and Production stages with per-Order hold-back; overdue / due-soon dashboard; works on phones |
+| **Sat Nov 21: money**       | Commission rules (admin), Commission earned on Delivered, Remittances with Owner confirmation, Amount owed per Agent with days since delivery                                                                                                                                                                                                   |
+| **Sat Dec 12: public site** | Homepage, sample gallery, public status lookup (rate-limited); `ARCHITECTURE.md`                                                                                                                                                                                                                                                                |
 
 ## Architecture
 
@@ -93,9 +91,9 @@ Money is stored as integer centavos. Every table has `created_at`/`updated_at`; 
 
 - Commission on Other items (medals, plaques): not decided by the owners yet.
 - Vercel's Hobby plan is non-commercial: pay for Pro (~$20/month) or move production to another host before real Orders go in. Decide by Oct 17 (ADR either way). At the same time, store the Neon database URLs as Vercel Secrets (rotating the Neon password if needed), before anyone else gets access.
-- Google sign-in is in Testing mode (test users only, an "unverified app" warning). Publishing needs a `/privacy` page (also the dog-tag privacy notice) and the final domain. Do it by Oct 17.
-- Neon preview branches copy production, so once real Orders exist, previews hold real customer data. Before Oct 17, branch previews from a seeded fake-data branch instead.
-- Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Nov 7.
+- Google sign-in is in Testing mode (test users only, an "unverified app" warning). Publishing needs a `/privacy` page (also the dog-tag privacy notice) and the final domain. Do it by Fri Nov 13.
+- Neon preview branches copy production, so once real Orders exist, previews hold real customer data. Before Sat Nov 14, branch previews from a seeded fake-data branch instead.
+- Rate-limit store for the status lookup: a Postgres table or a hosted Redis. Decide by Sat Dec 12.
 
 ## Later (not v1)
 
