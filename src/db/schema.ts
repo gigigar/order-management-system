@@ -304,7 +304,7 @@ export const payment = pgTable(
     collectedByAgentId: integer().references(() => agent.id, {
       onDelete: "restrict",
     }),
-    receiptNo: text(),
+    receiptNo: text().notNull(),
     paidOn: date().notNull(),
     ...timestamps,
     ...audit,
