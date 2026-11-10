@@ -27,7 +27,11 @@ export default async function EditAgentPage({
       <PageHeader title="Edit Agent" />
       <AgentForm
         id={found.id}
-        defaultValues={{ name: found.name, areaId: found.areaId }}
+        defaultValues={{
+          name: found.name,
+          phone: found.phone,
+          areaId: found.areaId,
+        }}
         areas={areas}
       />
     </div>

@@ -6,8 +6,10 @@ import { itemInputFromRow } from "@/lib/items";
 import type { BatchItemInput, SchoolOrderInput } from "@/lib/validation";
 import { requireUser } from "@/lib/session";
 import { PageHeader } from "@/components/page-header";
+import { RecordActions } from "@/components/record-actions";
 import { loadPayments } from "../../payments/load";
 import { PaymentsSection } from "../../payments/payments-section";
+import { deleteBatch, setBatchCancelled } from "../actions";
 import { BatchEntry } from "../batch-entry";
 import { BatchForm } from "../batch-form";
 import { batchFormOptions } from "../options";
@@ -78,7 +80,16 @@ export default async function BatchPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={`Batch · ${found.schoolName}`} />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader title={`Batch · ${found.schoolName}`} />
+        <RecordActions
+          noun="Batch"
+          cancelled={b.cancelledAt !== null}
+          canDelete={user.role === "admin" && payments.payments.length === 0}
+          setCancelled={setBatchCancelled.bind(null, b.id)}
+          remove={deleteBatch.bind(null, b.id)}
+        />
+      </div>
       <BatchForm
         id={b.id}
         options={options}

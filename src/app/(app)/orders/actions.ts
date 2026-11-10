@@ -2,7 +2,9 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/db";
+import { deleteUnpaidOrder } from "@/db/record-removal";
 import {
   StaleRowError,
   syncItems,
@@ -12,7 +14,7 @@ import { agentCredit, order } from "@/db/schema";
 import { fieldErrorsOf, type ActionResult } from "@/lib/action-result";
 import { creditsFrom } from "@/lib/agent-credits";
 import { generateOrderCode } from "@/lib/order-code";
-import { requireUser } from "@/lib/session";
+import { requireAdmin, requireUser } from "@/lib/session";
 import {
   individualOrderSchema,
   rowId,
@@ -38,7 +40,7 @@ export async function saveIndividualOrder(
     parsed.data;
   const credits = creditsFrom({ agentId, secondAgentId, secondAgentShare });
 
-  // One transaction: the Order, its items and its Agent credits save together.
+  // One transaction: the Order, its items, and its Agent credits save together.
   const save = () =>
     db.transaction(async (tx) => {
       let orderId: number;
@@ -93,4 +95,37 @@ export async function saveIndividualOrder(
   }
   revalidatePath("/orders");
   return { ok: true, id: saved.orderId, itemIds: saved.itemIds };
+}
+
+// Cancelling keeps the order and its Payments on record; reports skip it.
+export async function setOrderCancelled(
+  id: number,
+  cancelled: boolean,
+): Promise<void> {
+  const user = await requireUser();
+  const orderId = rowId.unwrap().parse(id);
+  await db
+    .update(order)
+    .set({ cancelledAt: cancelled ? new Date() : null, updatedBy: user.id })
+    .where(and(eq(order.id, orderId), isNull(order.batchId)));
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${orderId}`);
+  revalidatePath("/dashboard");
+}
+
+// For orders entered by mistake. Owners only, and never once a Payment exists.
+export async function deleteOrder(
+  id: number,
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+  const deleted = await deleteUnpaidOrder(rowId.unwrap().parse(id));
+  if (!deleted) {
+    return {
+      error:
+        "This order has payments, so it can't be deleted. Cancel it instead.",
+    };
+  }
+  revalidatePath("/orders");
+  revalidatePath("/dashboard");
+  redirect("/orders");
 }

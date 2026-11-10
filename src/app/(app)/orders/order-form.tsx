@@ -10,6 +10,7 @@ import {
 } from "react-hook-form";
 import {
   FormError,
+  FormRow,
   SelectField,
   SubmitButton,
   TextField,
@@ -95,10 +96,9 @@ export function OrderForm({
       <form
         onSubmit={onSubmit}
         noValidate
-        className="flex max-w-3xl flex-col gap-6 rounded-xl border bg-card p-5"
+        className="flex flex-col rounded-xl border bg-card px-5 pb-5"
       >
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-2 font-semibold">Customer</legend>
+        <FormRow title="Customer">
           <TextField
             label="Name"
             error={errors.customerName?.message}
@@ -130,10 +130,9 @@ export function OrderForm({
             error={errors.address?.message}
             {...register("address", { setValueAs: emptyToNull })}
           />
-        </fieldset>
+        </FormRow>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-2 font-semibold">Items</legend>
+        <FormRow title="Items" columns="">
           {fields.map((f, index) => (
             <ItemFields
               key={f.id}
@@ -160,10 +159,9 @@ export function OrderForm({
             </button>
             <p className="font-medium">Total: {formatPesos(total)}</p>
           </div>
-        </fieldset>
+        </FormRow>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-2 font-semibold">Progress</legend>
+        <FormRow title="Progress">
           <TextField
             label="Due date"
             type="date"
@@ -181,12 +179,9 @@ export function OrderForm({
               </option>
             ))}
           </SelectField>
-        </fieldset>
+        </FormRow>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-2 font-semibold">
-            Agents (for Commission)
-          </legend>
+        <FormRow title="Agents (for Commission)">
           <SelectField
             label="Agent"
             error={errors.agentId?.message}
@@ -221,12 +216,20 @@ export function OrderForm({
               })}
             />
           )}
-        </fieldset>
+        </FormRow>
 
-        <FormError message={errors.root?.message} />
-        <SubmitButton pending={isSubmitting}>
-          {id === null ? "Create Order" : isDirty ? "Save changes" : "Saved"}
-        </SubmitButton>
+        <div className="flex flex-col gap-2 border-t pt-5">
+          <FormError message={errors.root?.message} />
+          <div className="flex justify-end">
+            <SubmitButton pending={isSubmitting}>
+              {id === null
+                ? "Create Order"
+                : isDirty
+                  ? "Save changes"
+                  : "Saved"}
+            </SubmitButton>
+          </div>
+        </div>
       </form>
     </FormProvider>
   );

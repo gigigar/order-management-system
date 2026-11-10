@@ -4,10 +4,12 @@ import { db } from "@/db";
 import { agentCredit, item, order } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { PageHeader } from "@/components/page-header";
+import { RecordActions } from "@/components/record-actions";
 import { itemInputFromRow } from "@/lib/items";
 import { batchFormOptions } from "../../batches/options";
 import { loadPayments } from "../../payments/load";
 import { PaymentsSection } from "../../payments/payments-section";
+import { deleteOrder, setOrderCancelled } from "../actions";
 import { OrderForm } from "../order-form";
 
 export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
@@ -33,15 +35,24 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={found.customerName}
-        description={
-          <>
-            Individual order · code{" "}
-            <span className="font-mono text-foreground">{found.code}</span>
-          </>
-        }
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title={found.customerName}
+          description={
+            <>
+              Individual order · code{" "}
+              <span className="font-mono text-foreground">{found.code}</span>
+            </>
+          }
+        />
+        <RecordActions
+          noun="order"
+          cancelled={found.cancelledAt !== null}
+          canDelete={user.role === "admin" && payments.payments.length === 0}
+          setCancelled={setOrderCancelled.bind(null, found.id)}
+          remove={deleteOrder.bind(null, found.id)}
+        />
+      </div>
       <OrderForm
         id={found.id}
         options={options}

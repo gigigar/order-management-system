@@ -27,7 +27,13 @@ export default async function EditSchoolPage({
       <PageHeader title="Edit School" />
       <SchoolForm
         id={found.id}
-        defaultValues={{ name: found.name, areaId: found.areaId }}
+        defaultValues={{
+          name: found.name,
+          areaId: found.areaId,
+          address: found.address,
+          repName: found.repName,
+          repPhone: found.repPhone,
+        }}
         areas={areas}
       />
     </div>

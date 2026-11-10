@@ -5,6 +5,7 @@ import { PRODUCTION_STAGES, productionStageLabels } from "@/lib/enums";
 import { formatPesos } from "@/lib/money";
 import { requireUser } from "@/lib/session";
 import { loadDueWork } from "./load";
+import { StageChart } from "./stage-chart";
 import { loadBusinessStats } from "./stats";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
@@ -37,15 +38,19 @@ export default async function DashboardPage() {
       value: formatPesos(stats.collectedThisMonth),
     },
   ];
-  // Bars are relative to the busiest Stage; Delivered isn't work in progress.
-  const stages = PRODUCTION_STAGES.filter((s) => s !== "delivered");
-  const busiest = Math.max(1, ...stats.ringsByStage.values());
+  // Delivered isn't work in progress.
+  const stages = PRODUCTION_STAGES.filter((s) => s !== "delivered").map(
+    (stage) => ({
+      label: productionStageLabels[stage],
+      rings: stats.ringsByStage.get(stage) ?? 0,
+    }),
+  );
 
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Dashboard"
-        description="Rings, money and what's due, at a glance."
+        description="Rings, money, and what's due, at a glance."
       />
       <dl className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
         {cards.map((card) => (
@@ -63,28 +68,7 @@ export default async function DashboardPage() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold tracking-tight">Rings by stage</h2>
-        <ul className="flex flex-col gap-2 rounded-xl border bg-card p-5">
-          {stages.map((stage) => {
-            const rings = stats.ringsByStage.get(stage) ?? 0;
-            return (
-              <li
-                key={stage}
-                className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 text-sm"
-              >
-                <span>{productionStageLabels[stage]}</span>
-                <span className="h-2.5 rounded-full bg-muted">
-                  <span
-                    className="block h-full rounded-full bg-sidebar-primary"
-                    style={{ width: `${(rings / busiest) * 100}%` }}
-                  />
-                </span>
-                <span className="text-right font-medium tabular-nums">
-                  {rings}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        <StageChart stages={stages} />
       </section>
 
       <DueTable

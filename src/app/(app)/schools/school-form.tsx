@@ -10,6 +10,7 @@ import {
   TextField,
 } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
+import { emptyToNull } from "@/lib/form-values";
 import { schoolSchema, type SchoolInput } from "@/lib/validation";
 import { saveSchool } from "./actions";
 
@@ -31,7 +32,11 @@ export function SchoolForm({
     formState: { errors, isSubmitting },
   } = useForm<SchoolInput>({
     resolver: zodResolver(schoolSchema),
-    defaultValues,
+    defaultValues: defaultValues ?? {
+      address: null,
+      repName: null,
+      repPhone: null,
+    },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -67,6 +72,22 @@ export function SchoolForm({
           </option>
         ))}
       </SelectField>
+      <TextField
+        label="Address (optional)"
+        error={errors.address?.message}
+        {...register("address", { setValueAs: emptyToNull })}
+      />
+      <TextField
+        label="Rep (optional)"
+        error={errors.repName?.message}
+        {...register("repName", { setValueAs: emptyToNull })}
+      />
+      <TextField
+        label="Rep contact number (optional)"
+        type="tel"
+        error={errors.repPhone?.message}
+        {...register("repPhone", { setValueAs: emptyToNull })}
+      />
       <FormError message={errors.root?.message} />
       <SubmitButton pending={isSubmitting}>
         {id === null ? "Add School" : "Save"}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import {
   FormError,
+  FormRow,
   SelectField,
   SubmitButton,
   TextField,
@@ -63,6 +64,8 @@ export function BatchForm({
   const schoolId = useWatch({ control, name: "schoolId" });
   const designs = options.designs.filter((d) => d.schoolId === schoolId);
   const hasSecondAgent = useWatch({ control, name: "secondAgentId" }) !== null;
+  const isSigned =
+    useWatch({ control, name: "dealStage" }) === "agreement_signed";
 
   const onSubmit = handleSubmit(async (values) => {
     const result = await saveBatch(id, values);
@@ -76,17 +79,24 @@ export function BatchForm({
     <form
       onSubmit={onSubmit}
       noValidate
-      className="flex max-w-3xl flex-col gap-6 rounded-xl border bg-card p-5"
+      className="flex flex-col rounded-xl border bg-card px-5 pb-5"
     >
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">School</legend>
+      <FormRow title="School">
         <SelectField
           label="School"
           error={errors.schoolId?.message}
           defaultValue=""
           {...register("schoolId", {
             valueAsNumber: true,
-            onChange: () => setValue("designId", null),
+            onChange: (e) => {
+              setValue("designId", null);
+              // Start from the School's Rep; the fields stay editable for this Batch.
+              const chosen = options.schools.find(
+                (s) => s.id === Number(e.target.value),
+              );
+              setValue("repName", chosen?.repName ?? null);
+              setValue("repPhone", chosen?.repPhone ?? null);
+            },
           })}
         >
           <option value="" disabled>
@@ -111,10 +121,9 @@ export function BatchForm({
             </option>
           ))}
         </SelectField>
-      </fieldset>
+      </FormRow>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Rep</legend>
+      <FormRow title="Rep">
         <TextField
           label="Rep name"
           error={errors.repName?.message}
@@ -126,14 +135,24 @@ export function BatchForm({
           error={errors.repPhone?.message}
           {...register("repPhone", { setValueAs: emptyToNull })}
         />
-      </fieldset>
+      </FormRow>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Progress</legend>
+      <FormRow
+        title="Progress"
+        columns={isSigned ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-2"}
+      >
         <SelectField
           label="Deal stage"
           error={errors.dealStage?.message}
-          {...register("dealStage")}
+          {...register("dealStage", {
+            onChange: (e) => {
+              if (e.target.value === "agreement_signed") return;
+              // Hidden fields must not keep values the user can no longer see.
+              setValue("agreementSignedOn", null);
+              setValue("dueDate", null);
+              setValue("productionStage", "order_received");
+            },
+          })}
         >
           {DEAL_STAGES.map((s) => (
             <option key={s} value={s}>
@@ -141,33 +160,36 @@ export function BatchForm({
             </option>
           ))}
         </SelectField>
-        <TextField
-          label="Agreement signed on"
-          type="date"
-          error={errors.agreementSignedOn?.message}
-          {...register("agreementSignedOn", { setValueAs: emptyToNull })}
-        />
-        <TextField
-          label="Due date"
-          type="date"
-          error={errors.dueDate?.message}
-          {...register("dueDate", { setValueAs: emptyToNull })}
-        />
-        <SelectField
-          label="Production stage"
-          error={errors.productionStage?.message}
-          {...register("productionStage")}
-        >
-          {PRODUCTION_STAGES.map((s) => (
-            <option key={s} value={s}>
-              {productionStageLabels[s]}
-            </option>
-          ))}
-        </SelectField>
-      </fieldset>
+        {isSigned && (
+          <>
+            <TextField
+              label="Agreement signed on"
+              type="date"
+              error={errors.agreementSignedOn?.message}
+              {...register("agreementSignedOn", { setValueAs: emptyToNull })}
+            />
+            <TextField
+              label="Due date"
+              type="date"
+              error={errors.dueDate?.message}
+              {...register("dueDate", { setValueAs: emptyToNull })}
+            />
+            <SelectField
+              label="Production stage"
+              error={errors.productionStage?.message}
+              {...register("productionStage")}
+            >
+              {PRODUCTION_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {productionStageLabels[s]}
+                </option>
+              ))}
+            </SelectField>
+          </>
+        )}
+      </FormRow>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 font-semibold">Agents (for Commission)</legend>
+      <FormRow title="Agents (for Commission)">
         <SelectField
           label="Agent"
           error={errors.agentId?.message}
@@ -200,12 +222,16 @@ export function BatchForm({
             {...register("secondAgentShare", { setValueAs: emptyToNullNumber })}
           />
         )}
-      </fieldset>
+      </FormRow>
 
-      <FormError message={errors.root?.message} />
-      <SubmitButton pending={isSubmitting}>
-        {id === null ? "Create Batch" : isDirty ? "Save changes" : "Saved"}
-      </SubmitButton>
+      <div className="flex flex-col gap-2 border-t pt-5">
+        <FormError message={errors.root?.message} />
+        <div className="flex justify-end">
+          <SubmitButton pending={isSubmitting}>
+            {id === null ? "Create Batch" : isDirty ? "Save changes" : "Saved"}
+          </SubmitButton>
+        </div>
+      </div>
     </form>
   );
 }

@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { FormError, SubmitButton, TextField } from "@/components/form-fields";
 import { applyErrors } from "@/lib/apply-errors";
+import { emptyToNull } from "@/lib/form-values";
 import { areaSchema, type AreaInput } from "@/lib/validation";
 import { saveArea } from "./actions";
 
 export function AreaForm({
   id = null,
-  defaultValues = { name: "" },
+  defaultValues = { name: "", address: null },
 }: {
   id?: number | null;
   defaultValues?: AreaInput;
@@ -44,6 +45,11 @@ export function AreaForm({
         label="Name"
         error={errors.name?.message}
         {...register("name")}
+      />
+      <TextField
+        label="Branch address (optional)"
+        error={errors.address?.message}
+        {...register("address", { setValueAs: emptyToNull })}
       />
       <FormError message={errors.root?.message} />
       <SubmitButton pending={isSubmitting}>

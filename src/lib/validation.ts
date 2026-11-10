@@ -28,9 +28,6 @@ const areaId = z
   .int()
   .positive("Choose an Area");
 
-export const areaSchema = z.object({ name });
-export const schoolSchema = z.object({ name, areaId });
-export const agentSchema = z.object({ name, areaId });
 export const stoneSchema = z.object({ name });
 
 const schoolId = z
@@ -66,6 +63,20 @@ const optionalText = (max: number) =>
   z.string().trim().max(max, `${max} characters at most`).nullable();
 const optionalId = z.number().int().positive().nullable();
 const optionalDate = z.iso.date("Enter a valid date").nullable();
+
+export const areaSchema = z.object({ name, address: optionalText(300) });
+export const schoolSchema = z.object({
+  name,
+  areaId,
+  address: optionalText(300),
+  repName: optionalText(100),
+  repPhone: optionalText(30),
+});
+export const agentSchema = z.object({
+  name,
+  phone: optionalText(30),
+  areaId,
+});
 
 // Up to 2 Agents share the Commission. The first gets 100% minus the second's share.
 // Shared by Batches and Individual orders.
@@ -151,11 +162,11 @@ const pesos = (message: string) =>
       "At most 2 decimal places",
     );
 
-const requiredText = (max: number) =>
+const requiredText = (max: number, message = "Required") =>
   z
-    .string({ error: "Required" })
+    .string({ error: message })
     .trim()
-    .min(1, "Required")
+    .min(1, message)
     .max(max, `${max} characters at most`);
 
 const itemBase = {
@@ -281,7 +292,7 @@ export const paymentSchema = z.object({
   method: z.enum(PAYMENT_METHODS),
   // Null = paid straight to the Main office.
   collectedByAgentId: optionalId,
-  receiptNo: requiredText(50),
+  receiptNo: requiredText(50, "Enter the receipt number"),
   paidOn: z.iso.date("Enter the date paid"),
 });
 
